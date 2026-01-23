@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    const CURRENT_VERSION = 'v17.2';
+    const CURRENT_VERSION = 'v17.3';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -293,18 +293,21 @@ function App() {
             <div className="space-y-4">
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/60 ml-2 text-left">App & Security</p>
               <div className="ios-card !p-0 divide-y divide-white/5">
-                <div className="p-5 flex items-center justify-between">
+                <button 
+                  onClick={() => { setIsChangingPass(true); haptic('medium'); }}
+                  className="w-full p-5 flex items-center justify-between hover:bg-primary/[0.05] transition-colors group"
+                >
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
                       <Lock className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-black">Passcode</p>
-                      <p className="text-[10px] font-bold text-muted-foreground">Secure your trade log</p>
+                      <p className="text-sm font-black text-primary">Change Passcode</p>
+                      <p className="text-[10px] font-bold text-muted-foreground">Update access password</p>
                     </div>
                   </div>
-                  <button onClick={() => setIsLocked(true)} className="ios-button-secondary !py-2 !px-4 !text-xs active:scale-95 transition-transform">Change</button>
-                </div>
+                  <ChevronRight className="w-4 h-4 text-primary/30" />
+                </button>
                 <div className="p-5 flex items-center justify-between">
                   <div className="flex items-center gap-4 text-left">
                     <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center">
@@ -340,22 +343,6 @@ function App() {
                   <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
                   <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
                 </label>
-                {/* Change Password Option */}
-                <button 
-                  onClick={() => { setIsChangingPass(true); haptic('medium'); }}
-                  className="w-full p-5 flex items-center justify-between hover:bg-primary/[0.05] transition-colors group border-b border-white/5"
-                >
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-primary">Security Settings</p>
-                      <p className="text-[10px] font-bold text-muted-foreground">Change access password</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-primary/30" />
-                </button>
 
                 {/* Password Change Modal */}
                 {isChangingPass && (
