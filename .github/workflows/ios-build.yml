@@ -58,13 +58,13 @@ jobs:
           mkdir -p Payload
           APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
           cp -r "$APP_PATH" Payload/
-          zip -rX FoxTrade-v19.3.ipa Payload
+          zip -rX FoxTrade-v19.4.ipa Payload
           
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FoxTrade-v19.3-IPA
-          path: FoxTrade-v19.3.ipa
+          name: FoxTrade-v19.4-IPA
+          path: FoxTrade-v19.4.ipa
 
   deploy:
     environment:
