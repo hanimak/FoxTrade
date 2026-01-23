@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    const CURRENT_VERSION = 'v17.5';
+    const CURRENT_VERSION = 'v17.6';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -425,8 +425,11 @@ function App() {
 
   return (
     <div className="h-screen bg-[#050507] font-sans selection:bg-primary/30 antialiased relative flex flex-col overflow-hidden">
-      {/* iOS Status Bar Background - Prevents content from appearing behind clock/status icons when scrolling */}
-      <div className="fixed top-0 left-0 right-0 h-[env(safe-area-inset-top)] bg-[#050507] z-[60] pointer-events-none" />
+      {/* iOS Glass Header - Fixed at top with safe area padding */}
+      <div className="fixed top-0 left-0 right-0 z-[60] backdrop-blur-xl bg-[#050507]/60 border-b border-white/5">
+        <div className="h-[env(safe-area-inset-top)] w-full" /> {/* Safe Area Spacer */}
+        <div className="h-4 w-full" /> {/* Additional spacing requested by user */}
+      </div>
       
       {/* Background Watermark Logo */}
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
@@ -436,7 +439,7 @@ function App() {
       {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} />}
       
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-6 pt-6 custom-scroll pb-44 relative">
+      <main className="flex-1 overflow-y-auto relative z-10 pt-[calc(env(safe-area-inset-top)+2rem)] px-6 custom-scroll pb-44">
         <div className="relative z-10">
           {renderTabContent()}
         </div>
