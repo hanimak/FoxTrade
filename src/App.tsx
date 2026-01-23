@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    const CURRENT_VERSION = 'v19.3';
+    const CURRENT_VERSION = 'v19.4';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
