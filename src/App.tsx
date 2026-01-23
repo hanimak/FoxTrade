@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    const CURRENT_VERSION = 'v17.0';
+    const CURRENT_VERSION = 'v17.2';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -49,12 +49,9 @@ function App() {
           }
         });
       }
-      // Force immediate reload with cache busting and clear session cache
-          sessionStorage.clear();
-          // Keep trade_records but clear version to trigger fresh load
-          localStorage.removeItem('app_version'); 
-          window.location.href = window.location.origin + window.location.pathname + '?v=' + CURRENT_VERSION + '&t=' + Date.now();
-      console.log('Updated to version:', CURRENT_VERSION);
+      // Clear session storage but keep local storage for data
+      sessionStorage.clear();
+      window.location.reload();
     }
 
     const totalPL = records.reduce((acc, curr) => acc + curr.profitLoss, 0);
