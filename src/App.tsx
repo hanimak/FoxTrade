@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    const CURRENT_VERSION = 'v18.1';
+    const CURRENT_VERSION = 'v19.3';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -432,9 +432,10 @@ function App() {
       </div>
       
       {/* Background Watermark Logo */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
-        <img src={logo} alt="" className="w-[120%] max-w-none grayscale rotate-12" />
-      </div>
+      <div 
+        className="fixed inset-0 bg-no-repeat bg-center bg-contain opacity-5 pointer-events-none z-0 overflow-hidden" 
+        style={{ backgroundImage: `url(${logo})` }}
+      ></div>
 
       {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} />}
       

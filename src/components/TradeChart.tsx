@@ -104,13 +104,13 @@ export function TradeChart({ data, initialCapital }: TradeChartProps) {
             />
             <YAxis 
               orientation="right"
-              fontSize={8}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
-              tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}
+              tick={{ fill: 'rgba(255,255,255,0.6)', fontWeight: '900' }}
               domain={[minCap - padding, maxCap + padding]}
-              tickFormatter={(value) => `$${(value/1000).toFixed(1)}k`}
-              width={35}
+              tickFormatter={(value) => `$${value.toLocaleString()}`}
+              width={60}
             />
             <Tooltip 
               contentStyle={{ 

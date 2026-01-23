@@ -1,25 +1,30 @@
-name: Build iOS IPA and Deploy Web # Triggered Update
+name: Build and Deploy
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: macos-latest
-    permissions:
-      contents: write
-      pages: write      # Required for GitHub Pages
-      id-token: write   # Required for GitHub Pages
-    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
           
       - name: Install dependencies
@@ -28,19 +33,15 @@ jobs:
       - name: Build Web Assets
         run: npm run build
         
-      - name: Upload Web Artifact
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-          
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
       - name: Capacitor Sync
         run: npx cap sync ios
         
-      - name: Build iOS App (.app)
+      - name: Build iOS App
         run: |
           xcodebuild -project ios/App/App.xcodeproj \
                      -scheme App \
@@ -52,21 +53,26 @@ jobs:
                      AD_HOC_CODE_SIGNING_ALLOWED=YES \
                      CLEAN_BUILD_ROOT=YES
 
-      - name: Create IPA (Payload Trick)
+      - name: Create IPA
         run: |
           mkdir -p Payload
-          # Find the .app file path dynamically to avoid errors
           APP_PATH=$(find build/Build/Products/Release-iphoneos -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "❌ Error: App.app not found"
-            exit 1
-          fi
           cp -r "$APP_PATH" Payload/
-          find Payload -name ".DS_Store" -delete
-          zip -rX FoxTrade.ipa Payload
+          zip -rX FoxTrade-v19.3.ipa Payload
           
-      - name: Upload IPA
+      - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FoxTrade-IPA
-          path: FoxTrade.ipa
+          name: FoxTrade-v19.3-IPA
+          path: FoxTrade-v19.3.ipa
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
