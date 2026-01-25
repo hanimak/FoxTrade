@@ -21,7 +21,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital }: S
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 px-4">
       
       {/* Horizontal Thin Stats Layout */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
         <StatCard 
           label="WIN RATE" 
           value={`${stats.winRate.toFixed(1)}%`} 
@@ -64,6 +64,17 @@ export function StatsOverview({ stats, periodStats, records, initialCapital }: S
           trend="negative"
           percentage={100 - stats.maxDrawdown}
         />
+        {/* Placeholder to fill gap on mobile if odd number, but here we have 7. 
+            On mobile 7 cards in 2 columns = 3 rows + 1 card. 
+            Let's add a special "Growth" or "Health" small card for mobile to fill the 8th slot. */}
+        <div className="sm:hidden">
+          <StatCard 
+            label="STATUS" 
+            value={stats.winRate >= 50 ? 'BULLISH' : 'BEARISH'} 
+            trend={stats.winRate >= 50 ? 'positive' : 'negative'}
+            percentage={stats.winRate}
+          />
+        </div>
       </div>
 
       {/* Embedded Portfolio Growth Chart */}
@@ -77,7 +88,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital }: S
             <span className="text-[8px] sm:text-[9px] font-black text-primary/60 uppercase tracking-widest">Real-time Data</span>
           </div>
         </div>
-        <div className="w-full min-h-[300px] sm:min-h-[500px]">
+        <div className="w-full h-[250px] sm:h-[500px]">
           <TradeChart data={records} initialCapital={initialCapital} />
         </div>
       </div>
