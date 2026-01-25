@@ -198,21 +198,21 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
 
   return (
     <div className={cn(
-      "w-full flex flex-col !p-6 !pb-12 !rounded-[2.5rem] bg-transparent backdrop-blur-xl border border-white/[0.05] shadow-2xl",
+      "w-full h-full flex flex-col p-2 sm:p-6 pb-4 sm:pb-12 bg-transparent",
       className
     )}>
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.05]">
-            <Activity className="w-4 h-4 text-primary/60" />
+      <div className="flex items-center justify-between mb-2 sm:mb-4 relative z-10 px-2">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/[0.03] rounded-lg flex items-center justify-center border border-white/[0.05]">
+            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary/60" />
           </div>
           <div className="text-left">
-            <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-0.5">Portfolio Growth</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tighter text-white">${capitals[capitals.length - 1]?.toLocaleString() || '0'}</span>
+            <h3 className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-0.5">Portfolio Growth</h3>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-sm sm:text-xl font-black tracking-tighter text-white">${capitals[capitals.length - 1]?.toLocaleString() || '0'}</span>
               {realData.length > 1 && realData[realData.length - 1].close !== null && realData[realData.length - 2]?.close !== null && (
                 <span className={cn(
-                  "text-[10px] font-black px-2 py-0.5 rounded-lg",
+                  "text-[8px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-lg",
                   realData[realData.length - 1].close >= realData[realData.length - 2].close 
                     ? "text-green-500/80 bg-green-500/5" 
                     : "text-red-500/80 bg-red-500/5"
@@ -226,7 +226,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center bg-black/40 p-1 rounded-2xl border border-white/5 shadow-inner">
+        <div className="flex items-center bg-black/40 p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-white/5 shadow-inner">
           <button 
             type="button"
             onClick={(e) => {
@@ -235,14 +235,14 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               setViewMode('line');
             }}
             className={cn(
-              "px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2",
+              "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1 sm:gap-2",
               viewMode === 'line' 
                 ? "bg-white/[0.05] text-white border border-white/10 shadow-lg" 
                 : "text-white/20 hover:text-white/40"
             )}
           >
-            <LineChart className="w-3.5 h-3.5" />
-            <span className="text-[9px] font-black uppercase tracking-wider hidden sm:inline">Line</span>
+            <LineChart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider hidden xs:inline">Line</span>
           </button>
           <button 
             type="button"
@@ -252,25 +252,25 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               setViewMode('candle');
             }}
             className={cn(
-              "px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2",
+              "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1 sm:gap-2",
               viewMode === 'candle' 
                 ? "bg-white/[0.05] text-white border border-white/10 shadow-lg" 
                 : "text-white/20 hover:text-white/40"
             )}
           >
-            <CandlestickChart className="w-3.5 h-3.5" />
-            <span className="text-[9px] font-black uppercase tracking-wider hidden sm:inline">Candle</span>
+            <CandlestickChart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider hidden xs:inline">Candle</span>
           </button>
         </div>
       </div>
 
-      <div className="w-full relative z-10 h-[500px]">
+      <div className="w-full relative z-10 flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           {viewMode === 'line' ? (
             <AreaChart 
               key="line-view"
               data={activeData} 
-              margin={{ top: 5, right: 10, left: -20, bottom: 40 }}
+              margin={{ top: 5, right: 5, left: -25, bottom: 20 }}
             >
               <defs>
                 <linearGradient id="colorCapital" x1="0" y1="0" x2="0" y2="1">

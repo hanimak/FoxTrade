@@ -88,7 +88,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital }: S
             <span className="text-[8px] sm:text-[9px] font-black text-primary/60 uppercase tracking-widest">Real-time Data</span>
           </div>
         </div>
-        <div className="w-full h-[250px] sm:h-[500px]">
+        <div className="w-full h-[350px] sm:h-[500px]">
           <TradeChart data={records} initialCapital={initialCapital} />
         </div>
       </div>
