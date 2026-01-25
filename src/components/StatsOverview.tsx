@@ -1,10 +1,9 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import React from 'react';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { type Statistics, type PeriodStats } from '../lib/statistics';
 import { cn } from '../lib/utils';
-import { TrendingUp, TrendingDown, Target, Zap, Activity, Calendar, Award, AlertTriangle } from 'lucide-react';
-import { TradeHeatmap } from './TradeHeatmap';
+import { TradeChart } from './TradeChart';
 import { type DailyRecord } from '../types';
+import { haptic } from '../lib/utils';
 
 interface StatsOverviewProps {
   stats: Statistics;
@@ -14,167 +13,222 @@ interface StatsOverviewProps {
     monthly: PeriodStats[];
     daily: PeriodStats[];
   };
+  initialCapital: number;
 }
 
-export function StatsOverview({ stats, periodStats, records }: StatsOverviewProps) {
+export function StatsOverview({ stats, periodStats, records, initialCapital }: StatsOverviewProps) {
   return (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 px-4">
       
-      {/* Key Metrics Grid - 2x2 on Mobile */}
-      <div className="grid grid-cols-2 gap-2.5">
+      {/* Horizontal Thin Stats Layout */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
         <StatCard 
-          label="Win Rate" 
-          value={`${stats.winRate.toFixed(0)}%`} 
-          icon={<Target className="w-4 h-4" />}
-          subtext={`${stats.winningTrades}W - ${stats.losingTrades}L`}
+          label="WIN RATE" 
+          value={`${stats.winRate.toFixed(1)}%`} 
           trend={stats.winRate >= 50 ? 'positive' : 'negative'}
+          percentage={stats.winRate}
         />
         <StatCard 
-          label="Profit Factor" 
+          label="PROFIT FACTOR" 
           value={stats.profitFactor.toFixed(2)} 
-          icon={<Zap className="w-4 h-4" />}
-          subtext="Gross W/L"
           trend={stats.profitFactor >= 1.5 ? 'positive' : stats.profitFactor >= 1 ? 'neutral' : 'negative'}
+          percentage={(stats.profitFactor / 3) * 100}
         />
         <StatCard 
-          label="Max DD" 
-          value={`${stats.maxDrawdown.toFixed(1)}%`} 
-          icon={<TrendingDown className="w-4 h-4" />}
-          subtext={`-$${Math.round(stats.maxDrawdownValue)}`}
-          trend="negative"
-        />
-        <StatCard 
-          label="Avg P/L" 
+          label="EXPECTANCY" 
           value={`$${Math.round(stats.expectedValue)}`} 
-          icon={<Activity className="w-4 h-4" />}
-          subtext="Per Trade"
           trend={stats.expectedValue > 0 ? 'positive' : 'negative'}
+          percentage={50 + (stats.expectedValue / 1000) * 50}
         />
-      </div>
-
-      {/* Trade Analysis Section - 2x2 on Mobile */}
-      <div className="grid grid-cols-2 gap-2.5">
         <StatCard 
-          label="Avg Win" 
+          label="TRADES" 
+          value={stats.totalTrades} 
+          trend="neutral"
+          percentage={Math.min(stats.totalTrades, 100)}
+        />
+        <StatCard 
+          label="AVG WIN" 
           value={`+$${Math.round(stats.averageWin)}`} 
-          icon={<TrendingUp className="w-4 h-4" />}
           trend="positive"
+          percentage={75}
         />
         <StatCard 
-          label="Avg Loss" 
+          label="AVG LOSS" 
           value={`-$${Math.round(stats.averageLoss)}`} 
-          icon={<TrendingDown className="w-4 h-4" />}
           trend="negative"
+          percentage={40}
         />
         <StatCard 
-          label="Best Day" 
-          value={`+$${Math.round(stats.bestDay)}`} 
-          icon={<Award className="w-4 h-4" />}
-          trend="positive"
-        />
-        <StatCard 
-          label="Worst Day" 
-          value={`$${Math.round(stats.worstDay)}`} 
-          icon={<AlertTriangle className="w-4 h-4" />}
+          label="DRAWDOWN" 
+          value={`${stats.maxDrawdown.toFixed(1)}%`} 
           trend="negative"
+          percentage={100 - stats.maxDrawdown}
         />
       </div>
 
-      {/* Weekly Performance & Heatmap - Compact Stack */}
-      <div className="flex flex-col gap-3">
-        {/* Weekly Performance Chart - Reduced Height */}
-        <div className="w-full h-[280px]">
-          <div className="ios-card !p-4 text-center flex flex-col justify-between h-full !rounded-[2rem]">
-            <div className="mb-2 relative z-10 flex flex-col items-center">
-              <div className="p-2 bg-primary/10 rounded-xl mb-2 backdrop-blur-md border border-primary/10">
-                <Calendar className="w-4 h-4 text-primary" />
-              </div>
-              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 bg-white/5 px-3 py-1 rounded-full inline-block border border-white/5">Weekly Performance</p>
-            </div>
+      {/* Embedded Portfolio Growth Chart */}
+      <div className="w-full bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] overflow-hidden p-6 shadow-2xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Portfolio Trajectory</p>
+            <h3 className="text-xl font-black text-white tracking-tighter">Growth Analysis</h3>
+          </div>
+          <div className="px-4 py-1 bg-white/[0.03] border border-white/[0.05] rounded-full">
+            <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Real-time Data</span>
+          </div>
+        </div>
+        <div className="w-full min-h-[500px]">
+          <TradeChart data={records} initialCapital={initialCapital} />
+        </div>
+      </div>
 
-            <div className="flex-1 w-full relative z-10 min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={periodStats.weekly.slice(-5)} margin={{ top: 5, right: 0, left: -30, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="barGradientPositive" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4ade80" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#22c55e" stopOpacity={0.8} />
-                    </linearGradient>
-                    <linearGradient id="barGradientNegative" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f87171" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.8} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                  <XAxis 
-                    dataKey="label" 
-                    fontSize={8} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tick={{ fill: 'rgba(255,255,255,0.3)', fontWeight: 800 }}
-                  />
-                  <YAxis hide />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(28, 28, 30, 0.95)', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      fontSize: '10px',
-                      fontWeight: '900',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  />
-                  <Bar dataKey="profit" radius={[6, 6, 0, 0]}>
-                    {periodStats.weekly.slice(-5).map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.profit >= 0 ? 'url(#barGradientPositive)' : 'url(#barGradientNegative)'} 
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+      {/* Performance Distribution */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Weekly Performance */}
+        <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">Weekly Performance</p>
+            <div className="w-2 h-2 rounded-full bg-primary/40 animate-pulse" />
+          </div>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={periodStats.weekly.slice(-6)} margin={{ top: 5, right: 0, left: -30, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="barGradientPositive" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0.2} />
+                  </linearGradient>
+                  <linearGradient id="barGradientNegative" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.2} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
+                <XAxis 
+                  dataKey="label" 
+                  fontSize={8} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: 900 }}
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(10,10,12,0.8)', 
+                    backdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '16px',
+                    fontSize: '10px',
+                    fontWeight: '900',
+                    color: '#ffffff'
+                  }}
+                  itemStyle={{ color: '#ffffff' }}
+                />
+                <Bar dataKey="profit" radius={[4, 4, 0, 0]} barSize={24}>
+                  {periodStats.weekly.slice(-6).map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.profit >= 0 ? 'url(#barGradientPositive)' : 'url(#barGradientNegative)'} 
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="h-auto">
-          <TradeHeatmap records={records} />
+        {/* Daily Distribution */}
+        <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">Daily Distribution</p>
+            <div className="w-2 h-2 rounded-full bg-white/10" />
+          </div>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={periodStats.daily} margin={{ top: 5, right: 0, left: -30, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" vertical={false} />
+                <XAxis 
+                  dataKey="label" 
+                  fontSize={8} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: 900 }}
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(10,10,12,0.8)', 
+                    backdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '16px',
+                    fontSize: '10px',
+                    fontWeight: '900',
+                    color: '#ffffff'
+                  }}
+                  itemStyle={{ color: '#ffffff' }}
+                />
+                <Bar dataKey="profit" radius={[4, 4, 0, 0]} barSize={24}>
+                  {periodStats.daily.map((entry, index) => (
+                    <Cell 
+                      key={`cell-daily-${index}`} 
+                      fill={entry.profit >= 0 ? 'url(#barGradientPositive)' : 'url(#barGradientNegative)'} 
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>
   );  
 }
 
-function StatCard({ label, value, icon, subtext, trend }: { 
+function StatCard({ 
+  label, 
+  value, 
+  trend,
+  percentage = 0
+}: { 
   label: string; 
   value: string | number; 
-  icon: React.ReactNode;
-  subtext?: string;
   trend?: 'positive' | 'negative' | 'neutral';
+  percentage?: number;
 }) {
+  const color = trend === 'positive' ? '#22c55e' : trend === 'negative' ? '#ef4444' : '#3b82f6';
+
   return (
-    <div className="ios-card !p-3.5 flex flex-col gap-1.5 !rounded-[1.5rem] relative overflow-hidden group">
-      <div className="flex items-center justify-between relative z-10">
+    <div 
+      className="relative overflow-hidden group/stat bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-3 sm:p-4 rounded-2xl sm:rounded-[1.8rem] transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.04] hover:border-white/10"
+      onMouseEnter={() => haptic('light')}
+    >
+      <div className="flex justify-between items-start relative z-10">
+        <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-white/30">
+          {label}
+        </p>
         <div className={cn(
-          "p-1.5 rounded-lg",
-          trend === 'positive' ? "bg-green-500/10 text-green-500" : 
-          trend === 'negative' ? "bg-red-500/10 text-red-500" : 
-          "bg-primary/10 text-primary"
-        )}>
-          {React.cloneElement(icon as React.ReactElement<any>, { className: "w-3.5 h-3.5" })}
-        </div>
-        {subtext && <span className="text-[7px] font-black text-muted-foreground/40 uppercase tracking-widest">{subtext}</span>}
+          "w-1 h-1 rounded-full",
+          trend === 'positive' ? "bg-green-500" : 
+          trend === 'negative' ? "bg-red-500" : 
+          "bg-blue-500"
+        )} />
       </div>
-      <div className="relative z-10 text-left">
-        <p className="text-[8px] font-black text-muted-foreground/50 uppercase tracking-[0.15em] mb-0.5">{label}</p>
-        <p className={cn(
-          "text-base font-black tracking-tighter",
-          trend === 'positive' ? "text-green-400" : 
-          trend === 'negative' ? "text-red-400" : 
-          "text-white"
-        )}>{value}</p>
+
+      <div className="flex items-end justify-between relative z-10">
+        <div className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          {value}
+        </div>
+      </div>
+
+      {/* Clean Progress Bar at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/[0.02]">
+        <div 
+          className="h-full transition-all duration-700 ease-out"
+          style={{ 
+            width: `${Math.min(Math.max(percentage, 0), 100)}%`,
+            backgroundColor: color
+          }}
+        />
       </div>
     </div>
   );

@@ -32,9 +32,11 @@
     <title>FOX TRADE v19.9</title>
     
     <script>
-      // Force Version Update
+      // Only run version check if NOT in Electron
+      const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
       const VERSION = 'v19.9';
-      if (localStorage.getItem('app_version') !== VERSION) {
+      
+      if (!isElectron && localStorage.getItem('app_version') !== VERSION) {
         localStorage.setItem('app_version', VERSION);
         sessionStorage.clear();
         if ('serviceWorker' in navigator) {

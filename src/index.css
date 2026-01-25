@@ -13,8 +13,8 @@
     --popover: 240 10% 6%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 47 95% 50%;
-    --primary-rgb: 255, 204, 0;
+    --primary: 47 95% 55%;
+    --primary-rgb: 212, 175, 55;
     --primary-foreground: 240 10% 3.9%;
 
     --secondary: 240 5% 15%;
@@ -152,6 +152,29 @@
   .direction-rtl {
     direction: ltr;
   }
+
+  .custom-scroll::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+
+  @keyframes ping-slow {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  @keyframes ping-slower {
+    0% { transform: scale(1); opacity: 0.3; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  .animate-ping-slow {
+    animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-ping-slower {
+    animation: ping-slower 5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+.perspective-1000 {
+  perspective: 1000px;
 }
 
 /* Hide scrollbar for all browsers */

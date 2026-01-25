@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run build && electron-builder build --win --publish never",
+    "electron:build:win": "ELECTRON=true npm run build && electron-builder build --win --publish never",
+    "electron:build:mac": "ELECTRON=true npm run build && electron-builder build --mac --publish never",
     "ios:sync": "npm run build && npx cap sync ios",
     "ios:open": "npx cap open ios"
   },
@@ -25,10 +26,39 @@
       "electron/**/*"
     ],
     "win": {
-      "icon": "public/app-logo-new.png",
+      "icon": "src/assets/app-logo-new.png",
       "target": [
         "nsis"
       ]
+    },
+    "mac": {
+      "icon": "src/assets/app-logo-new.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.finance",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "minimumSystemVersion": "10.13.0",
+      "extendInfo": {
+        "LSMinimumSystemVersion": "10.13.0",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "nsis": {
       "oneClick": false,
@@ -40,11 +70,14 @@
     "@capacitor/ios": "^8.0.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "firebase": "^12.8.0",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.7.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.1",
@@ -55,7 +88,7 @@
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
-    "electron": "^40.0.0",
+    "electron": "28.3.3",
     "electron-builder": "^26.4.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
