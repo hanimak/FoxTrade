@@ -7,7 +7,7 @@
     <meta http-equiv="Expires" content="0" />
     
     <!-- FAVICON -->
-    <link rel="icon" type="image/png" href="./app-logo-new.png" />
+    <link rel="icon" type="image/png" href="./app-logo-new.png?v=2" />
     
     <!-- iOS PWA SETTINGS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,9 +15,9 @@
     <meta name="apple-mobile-web-app-title" content="Fox Trade">
     
     <!-- THE ICON (The absolute most important part for iOS) -->
-    <link rel="apple-touch-icon" href="./app-logo-new.png">
-    <link rel="apple-touch-icon-precomposed" href="./app-logo-new.png">
-    <link rel="apple-touch-startup-image" href="./app-logo-new.png">
+    <link rel="apple-touch-icon" href="./app-logo-new.png?v=2">
+    <link rel="apple-touch-icon-precomposed" href="./app-logo-new.png?v=2">
+    <link rel="apple-touch-startup-image" href="./app-logo-new.png?v=2">
     
     <!-- PWA MANIFEST -->
     <link rel="manifest" href="/manifest.json" />
@@ -35,7 +35,7 @@
     <script>
       // Only run version check if NOT in Electron
       const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
-      const VERSION = 'v34.5';
+      const VERSION = 'v34.6';
       
       if (!isElectron && localStorage.getItem('app_version') !== VERSION) {
         localStorage.setItem('app_version', VERSION);
