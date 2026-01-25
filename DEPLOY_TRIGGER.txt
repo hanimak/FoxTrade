@@ -1,1 +1,1 @@
-Rescue trigger: Sun Jan 25 17:53:43 EET 2026
+Fresh deploy after manual clean: Sun Jan 25 17:58:18 EET 2026
