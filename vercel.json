@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "framework": "vite",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "dist",
   "rewrites": [
     {
@@ -9,6 +8,7 @@
       "destination": "/index.html"
     }
   ],
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",
