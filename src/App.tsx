@@ -263,24 +263,20 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    // Fresh Start Version v34.0
-    const CURRENT_VERSION = 'v34.0';
+    // Fresh Start Version v34.3
+    const CURRENT_VERSION = 'v34.3';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
-      // Clear any service workers if possible
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          for (let registration of registrations) {
-            registration.unregister();
-          }
-        });
+        navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
       }
-      // Clear session storage but keep local storage for data
       sessionStorage.clear();
-      window.location.reload();
+      window.location.href = window.location.origin + window.location.pathname + '?update=' + Date.now();
     }
+  }, []);
 
+  useEffect(() => {
     const totalPL = records.reduce((acc, curr) => acc + curr.profitLoss, 0);
     const newCapital = parseFloat((initialCapital + totalPL).toFixed(2));
     setCurrentCapital(newCapital);
@@ -1948,11 +1944,6 @@ function App() {
 
       {/* System Stats Footer */}
       <div className="mt-12 mb-24 flex flex-col items-center gap-4">
-        <div className="px-4 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
-          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
-            System Engine <span className="text-primary/40 ml-2">v34.0</span>
-          </p>
-        </div>
       </div>
     </div>
   );
