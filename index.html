@@ -19,6 +19,10 @@
     <link rel="apple-touch-icon-precomposed" href="https://foxtrademak.github.io/fox/icon-pwa-34.png">
     <link rel="apple-touch-startup-image" href="https://foxtrademak.github.io/fox/icon-pwa-34.png">
     
+    <!-- iOS Icon background hint -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a1c">
+    
     <!-- PWA MANIFEST -->
     <link rel="manifest" href="https://foxtrademak.github.io/fox/manifest.json" />
     
@@ -35,7 +39,7 @@
     <script>
       // Only run version check if NOT in Electron
       const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
-      const VERSION = 'v35.4';
+      const VERSION = 'v35.5';
       
       if (!isElectron && localStorage.getItem('app_version') !== VERSION) {
         localStorage.setItem('app_version', VERSION);
