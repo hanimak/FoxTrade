@@ -35,7 +35,7 @@
     <script>
       // Only run version check if NOT in Electron
       const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
-      const VERSION = 'v34.3';
+      const VERSION = 'v34.4';
       
       if (!isElectron && localStorage.getItem('app_version') !== VERSION) {
         localStorage.setItem('app_version', VERSION);
