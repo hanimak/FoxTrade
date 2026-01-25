@@ -24,18 +24,18 @@
     
     <style>
       :root { --apple-icon-bg: #1a1a1c; }
-      body { background-color: #050507; margin: 0; padding: 0; }
+      body { background-color: #0a0a0c; margin: 0; padding: 0; }
     </style>
     
-    <meta name="theme-color" content="#1a1a1c">
+    <meta name="theme-color" content="#0a0a0c">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     
-    <title>Fox Trade v32.0</title>
+    <title>Fox Trade v34.0</title>
     
     <script>
       // Only run version check if NOT in Electron
       const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
-      const VERSION = 'v32.0';
+      const VERSION = 'v34.0';
       
       if (!isElectron && localStorage.getItem('app_version') !== VERSION) {
         localStorage.setItem('app_version', VERSION);

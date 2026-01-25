@@ -3,8 +3,8 @@
   "short_name": "FoxTrade",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1c",
-  "theme_color": "#1a1a1c",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
   "icons": [
     {
       "src": "/fox-icon-v19.png",
