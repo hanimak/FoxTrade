@@ -41,6 +41,14 @@ function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
 
   const [records, setRecords] = useState<DailyRecord[]>(() => {
     const saved = localStorage.getItem('trade_records');
@@ -264,8 +272,8 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    // Fresh Start Version v35.7
-    const CURRENT_VERSION = 'v35.7';
+    // Fresh Start Version v35.8
+    const CURRENT_VERSION = 'v35.8';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -292,9 +300,8 @@ function App() {
 
   const marketSessions = useMemo(() => {
     // Lebanon is UTC+2 or UTC+3 (DST)
-    // We'll calculate the sessions based on the user's local time (computer time)
-    const now = new Date();
-    const localHour = now.getHours();
+    // We'll calculate the sessions based on the current system time
+    const localHour = currentTime.getHours();
 
     // Helper to check if current local hour is within a session
     // This correctly handles sessions that cross midnight
@@ -316,7 +323,7 @@ function App() {
       { name: 'Tokyo', hours: '03:00 - 12:00', active: isActive(3, 12) },
       { name: 'Sydney', hours: '01:00 - 10:00', active: isActive(1, 10) }
     ];
-  }, []);
+  }, [currentTime]);
 
   const stats = useMemo(() => calculateStatistics(records), [records]);
   const periodStats = useMemo(() => getPeriodStats(records), [records]);
