@@ -263,8 +263,8 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    // Version 20.1 Deployment Force
-    const CURRENT_VERSION = 'v20.1';
+    // Version 21.0 Deployment Force
+    const CURRENT_VERSION = 'v21.0';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -1950,7 +1950,7 @@ function App() {
       <div className="mt-12 mb-24 flex flex-col items-center gap-4">
         <div className="px-4 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
           <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
-            System Engine <span className="text-primary/40 ml-2">v20.1</span>
+            System Engine <span className="text-primary/40 ml-2">v21.0</span>
           </p>
         </div>
       </div>
