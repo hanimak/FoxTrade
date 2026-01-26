@@ -1546,18 +1546,18 @@ function App() {
         return (
           <div className="space-y-8 animate-fade-in pb-40 px-4">
             {/* Header Section */}
-            <div className="flex flex-col items-center mb-12">
-              <div className="w-20 h-20 bg-white/[0.03] border border-white/10 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-xl shadow-2xl relative group">
+            <div className="flex flex-col items-center mb-8">
+              <div className="w-16 h-16 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group">
                 <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Settings className="w-10 h-10 text-primary animate-spin-slow relative z-10" />
+                <Settings className="w-8 h-8 text-primary animate-spin-slow relative z-10" />
               </div>
               
-              <div className="flex flex-col items-center space-y-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(212,175,55,0.5)] animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Control Center</p>
+              <div className="flex flex-col items-center space-y-0.5">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <div className="w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_rgba(212,175,55,0.4)] animate-pulse" />
+                  <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Control Center</p>
                 </div>
-                <h2 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">
+                <h2 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">
                   App <span className="text-primary/70">Settings</span>
                 </h2>
               </div>
