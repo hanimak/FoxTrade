@@ -43,6 +43,49 @@ function App() {
   const [isSharing, setIsSharing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const sessions = useMemo(() => {
+    const getSessionStatus = (start: number, end: number, current: number) => {
+      if (start < end) return current >= start && current < end;
+      return current >= start || current < end; // For sessions crossing midnight
+    };
+
+    const currentHour = currentTime.getHours(); // Use local computer time
+    
+    const formatTime = (hour: number) => `${hour.toString().padStart(2, '0')}:00`;
+
+    // Local times based on user request (Sydney 01:00 - 10:00, London 11:00 - 19:00, etc.)
+    return [
+      { 
+        name: 'London', 
+        start: 11, 
+        end: 19, 
+        active: getSessionStatus(11, 19, currentHour),
+        timeDisplay: `${formatTime(11)} - ${formatTime(19)}`
+      },
+      { 
+        name: 'New York', 
+        start: 16, 
+        end: 0, 
+        active: getSessionStatus(16, 0, currentHour),
+        timeDisplay: `${formatTime(16)} - 00:00`
+      },
+      { 
+        name: 'Tokyo', 
+        start: 3, 
+        end: 12, 
+        active: getSessionStatus(3, 12, currentHour),
+        timeDisplay: `${formatTime(3)} - ${formatTime(12)}`
+      },
+      { 
+        name: 'Sydney', 
+        start: 1, 
+        end: 10, 
+        active: getSessionStatus(1, 10, currentHour),
+        timeDisplay: `${formatTime(1)} - ${formatTime(10)}`
+      }
+    ];
+  }, [currentTime]);
+
   const [records, setRecords] = useState<DailyRecord[]>(() => {
     const saved = localStorage.getItem('trade_records');
     return saved ? JSON.parse(saved) : [];
@@ -400,33 +443,6 @@ function App() {
     localStorage.setItem('monthly_target', monthlyTarget.toString());
     localStorage.setItem('show_targets_on_home', showTargetsOnHome.toString());
   }, [records, initialCapital, weeklyTarget, monthlyTarget, showTargetsOnHome]);
-
-  const marketSessions = useMemo(() => {
-    // Lebanon is UTC+2 or UTC+3 (DST)
-    // We'll calculate the sessions based on the current system time
-    const localHour = currentTime.getHours();
-
-    // Helper to check if current local hour is within a session
-    // This correctly handles sessions that cross midnight
-    const isActive = (start: number, end: number) => {
-      if (start < end) return localHour >= start && localHour < end;
-      return localHour >= start || localHour < end;
-    };
-
-    // Market hours in Beirut Time (UTC+3 DST / UTC+2 Standard)
-    // Shifted forward by 1 hour based on user request (Market Open 1:00)
-    // London: 11:00 - 19:00
-    // NY: 16:00 - 00:00
-    // Tokyo: 03:00 - 12:00
-    // Sydney: 01:00 - 10:00
-
-    return [
-      { name: 'London', hours: '11:00 - 19:00', active: isActive(11, 19) },
-      { name: 'New York', hours: '16:00 - 00:00', active: isActive(16, 0) },
-      { name: 'Tokyo', hours: '03:00 - 12:00', active: isActive(3, 12) },
-      { name: 'Sydney', hours: '01:00 - 10:00', active: isActive(1, 10) }
-    ];
-  }, [currentTime]);
 
   const stats = useMemo(() => calculateStatistics(records), [records]);
   const periodStats = useMemo(() => getPeriodStats(records), [records]);
@@ -856,46 +872,117 @@ function App() {
 
             {/* Unique Genius Net Worth Card */}
             <div className="relative group px-4 sm:px-0">
-              <div className="relative overflow-hidden bg-white/[0.01] border border-white/[0.05] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl backdrop-blur-sm">
-                <div className="relative z-10 flex flex-col items-center text-center space-y-6 sm:space-y-10">
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-3 px-5 py-2 bg-primary/10 border border-primary/20 rounded-full backdrop-blur-xl">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80">Dynamic Portfolio</p>
-                    </div>
-                  </div>
+              <div className="relative overflow-hidden bg-white/[0.01] border border-white/[0.05] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:pt-6 sm:pb-10 shadow-2xl backdrop-blur-sm">
+                {/* Share Button - Absolute Corner Positioning */}
+                <div className="absolute top-4 right-4 z-50">
+                  <button 
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className={cn(
+                      "p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-300 active:scale-90",
+                      isSharing && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {isSharing ? (
+                      <RefreshCcw className="w-5 h-5 text-primary animate-spin" />
+                    ) : (
+                      <Share2 className="w-5 h-5 text-white/20 transition-colors" />
+                    )}
+                  </button>
+                </div>
 
-                  <div className="absolute top-0 right-0 p-4 sm:p-6">
-                    <button 
-                      onClick={handleShare}
-                      disabled={isSharing}
-                      className={cn(
-                        "group relative p-3 sm:p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-500 hover:bg-primary/10 hover:border-primary/20 active:scale-90",
-                        isSharing && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      {isSharing ? (
-                        <RefreshCcw className="w-5 h-5 text-primary animate-spin" />
-                      ) : (
-                        <Share2 className="w-5 h-5 text-white/20 group-hover:text-primary transition-colors" />
-                      )}
-                    </button>
-                  </div>
+                <div className="relative z-10 flex flex-col items-center text-center space-y-4 sm:space-y-8">
+                   {/* Vertical Side Label - Hidden on small mobile */}
+                   <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 hidden xs:flex items-center justify-center bg-white/[0.02] border-r border-white/[0.05] backdrop-blur-md rounded-l-[2rem] sm:rounded-l-[2.5rem] overflow-hidden z-20">
+                     <div className="-rotate-90 whitespace-nowrap">
+                       <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-primary/80 select-none drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+                         Dynamic Portfolio
+                       </p>
+                     </div>
+                   </div>
 
-                  <div className="relative flex flex-col items-center w-full">
-                    <div className="flex items-baseline gap-1 sm:gap-4 relative">
-                      <div className="relative group/dollar">
-                        <span className="text-2xl sm:text-5xl font-extralight bg-gradient-to-b from-primary via-primary/80 to-primary/40 bg-clip-text text-transparent select-none">
-                          $
-                        </span>
+                  <div className="relative flex flex-col items-center w-full xs:pl-8 sm:pl-0">
+                    <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 relative w-full">
+                      
+                    {/* Market Sessions (Mobile Grid & Desktop Top) */}
+                    <div className="w-full">
+                      {/* Mobile: Grid Layout - Optimized */}
+                      <div className="grid grid-cols-2 gap-2 sm:hidden w-full px-2">
+                        {sessions.map((session) => (
+                          <div key={session.name} className={cn(
+                            "p-2 sm:p-3 rounded-xl border transition-all duration-300",
+                            session.active 
+                              ? "bg-primary/10 border-primary/20 shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
+                              : "bg-white/[0.01] border-white/[0.05] opacity-40"
+                          )}>
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className={cn(
+                                "text-[9px] sm:text-[10px] font-black uppercase tracking-tight",
+                                session.active ? "text-primary" : "text-white/40"
+                              )}>
+                                {session.name}
+                              </span>
+                              {session.active && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-primary animate-pulse" />}
+                            </div>
+                            <span className={cn(
+                              "text-[8px] sm:text-[9px] font-bold tracking-widest",
+                              session.active ? "text-primary/60" : "text-white/20"
+                            )}>
+                              {session.timeDisplay}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                      <h2 className="text-4xl sm:text-8xl font-black tracking-tighter text-white">
-                        {currentCapital.toLocaleString()}
-                      </h2>
+
+                      {/* Desktop: Horizontal Layout */}
+                      <div className="hidden sm:flex items-center justify-center gap-8 lg:gap-12 w-full">
+                        {sessions.map((session) => (
+                          <div key={session.name} className="flex flex-col items-center gap-1 group/session">
+                            <div className="flex items-center gap-2">
+                              <div className={cn(
+                                "w-1.5 h-1.5 rounded-full transition-all duration-500",
+                                session.active 
+                                  ? "bg-primary shadow-[0_0_10px_rgba(212,175,55,0.6)] animate-pulse" 
+                                  : "bg-white/10"
+                              )} />
+                              <span className={cn(
+                                "text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
+                                session.active ? "text-primary" : "text-white/40"
+                              )}>
+                                {session.name}
+                              </span>
+                            </div>
+                            <span className={cn(
+                              "text-[8px] font-bold tracking-[0.1em] transition-colors duration-300",
+                              session.active ? "text-primary/40" : "text-white/10"
+                            )}>
+                              {session.timeDisplay}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                      <div className="flex items-baseline gap-2 sm:gap-4 relative py-2">
+                        <div className="relative group/dollar">
+                          <span className="text-xl xs:text-2xl sm:text-5xl font-extralight bg-gradient-to-b from-primary via-primary/80 to-primary/40 bg-clip-text text-transparent select-none">
+                            $
+                          </span>
+                        </div>
+                        <h2 className="text-3xl xs:text-5xl sm:text-8xl font-black tracking-tighter text-white flex items-baseline">
+                          {Math.floor(currentCapital).toLocaleString()}
+                          <span className="text-lg xs:text-xl sm:text-4xl text-primary flex items-baseline">
+                              <span className="mx-0.5">.</span>
+                              <span className="ml-0.5 tracking-tight">
+                                {((currentCapital % 1) * 100).toFixed(0).padStart(2, '0')}
+                              </span>
+                            </span>
+                        </h2>
+                      </div>
                     </div>
                     
-                    {/* Genius Stats Row */}
-                    <div className="mt-8 sm:mt-12 grid grid-cols-3 gap-1.5 sm:gap-8 w-full max-w-xl px-1 sm:px-4">
+                    {/* Genius Stats Row - Better mobile spacing */}
+                    <div className="mt-4 sm:mt-10 grid grid-cols-3 gap-2 sm:gap-8 w-full max-w-xl px-2 sm:px-4">
                       {/* Health Score */}
                       <div className="flex flex-col items-center space-y-1.5 sm:space-y-3 group/stat transition-all duration-300 hover:scale-105 sm:hover:scale-110">
                         <p className="text-[6px] sm:text-[9px] font-black text-white/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Health Score</p>
@@ -1051,35 +1138,6 @@ function App() {
                 </div>
               </div>
             )}
-
-            {/* Market Sessions */}
-            <div className="grid grid-cols-1 gap-4">
-              {/* Live Market Sessions */}
-              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-6 space-y-4">
-                <div className="flex items-center gap-2 px-1">
-                  <Clock className="w-3 h-3 text-primary/60" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Market Sessions</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {marketSessions.map(session => (
-                    <div key={session.name} className={cn(
-                      "p-3 rounded-2xl border transition-all duration-500",
-                      session.active 
-                        ? "bg-primary/10 border-primary/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]" 
-                        : "bg-white/[0.01] border-white/[0.05] opacity-40"
-                    )}>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className={cn("text-[10px] font-black uppercase tracking-tight", session.active ? "text-primary" : "text-white/40")}>
-                          {session.name}
-                        </p>
-                        {session.active && <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />}
-                      </div>
-                      <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{session.hours}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
             <div className="space-y-4">
               <div className="flex flex-col items-center justify-center mb-4">
