@@ -874,24 +874,24 @@ function App() {
             <div className="relative group px-4 sm:px-0">
               <div className="relative overflow-hidden bg-white/[0.01] border border-white/[0.05] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:pt-6 sm:pb-10 shadow-2xl backdrop-blur-sm">
                 {/* Share Button - Absolute Corner Positioning */}
-                <div className="absolute top-4 right-4 z-50">
-                  <button 
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className={cn(
-                      "p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-300 active:scale-90",
-                      isSharing && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    {isSharing ? (
-                      <RefreshCcw className="w-5 h-5 text-primary animate-spin" />
-                    ) : (
-                      <Share2 className="w-5 h-5 text-white/20 transition-colors" />
-                    )}
-                  </button>
-                </div>
+                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50">
+                   <button 
+                     onClick={handleShare}
+                     disabled={isSharing}
+                     className={cn(
+                       "p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-300 active:scale-90",
+                       isSharing && "opacity-50 cursor-not-allowed"
+                     )}
+                   >
+                     {isSharing ? (
+                       <RefreshCcw className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-spin" />
+                     ) : (
+                       <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/20 transition-colors" />
+                     )}
+                   </button>
+                 </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center space-y-4 sm:space-y-8">
+                <div className="relative z-10 flex flex-col items-center text-center space-y-4 sm:space-y-8 pt-10 sm:pt-0">
                    {/* Vertical Side Label - Hidden on small mobile */}
                    <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 hidden xs:flex items-center justify-center bg-white/[0.02] border-r border-white/[0.05] backdrop-blur-md rounded-l-[2rem] sm:rounded-l-[2.5rem] overflow-hidden z-20">
                      <div className="-rotate-90 whitespace-nowrap">
