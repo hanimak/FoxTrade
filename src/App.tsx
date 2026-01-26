@@ -325,21 +325,9 @@ function App() {
     const savedVersion = localStorage.getItem('app_version');
     
     if (savedVersion !== CURRENT_VERSION) {
-      // Step 1: Immediately save the new version to prevent loop
+      // DISABLED AUTO-RELOAD TO STOP LOOP
       localStorage.setItem('app_version', CURRENT_VERSION);
-      
-      // Step 2: Clear other caches
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        });
-      }
-      sessionStorage.clear();
-      
-      // Step 3: Reload with a slight delay to ensure localStorage is written
-      setTimeout(() => {
-        window.location.href = window.location.origin + window.location.pathname + '?update=' + Date.now();
-      }, 100);
+      console.log('Version updated to:', CURRENT_VERSION);
     }
   }, []);
 
