@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 // Force Update v36.0
-import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles } from 'lucide-react';
+import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, FileDown, FileUp, ExternalLink, ChevronRight } from 'lucide-react';
 import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
 import * as XLSX from 'xlsx';
@@ -1544,180 +1544,196 @@ function App() {
       }
       case 'settings':
         return (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in px-4">
-            <div className="grid grid-cols-5 items-center justify-center gap-x-4 gap-y-12 sm:gap-x-12 sm:gap-y-16 max-w-4xl">
-              {/* Capital */}
-              <button 
-                onClick={() => { setIsEditingInitial(true); haptic('light'); }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-emerald-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-emerald-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-emerald-500/40 transition-all duration-500 group-hover:bg-emerald-500/10" />
-                  <Wallet className="w-7 h-7 sm:w-9 sm:h-9 text-emerald-500/40 group-hover:text-emerald-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
+          <div className="space-y-8 animate-fade-in pb-40 px-4">
+            {/* Header Section */}
+            <div className="flex flex-col items-center mb-12">
+              <div className="w-20 h-20 bg-white/[0.03] border border-white/10 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-xl shadow-2xl relative group">
+                <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Settings className="w-10 h-10 text-primary animate-spin-slow relative z-10" />
+              </div>
+              
+              <div className="flex flex-col items-center space-y-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(212,175,55,0.5)] animate-pulse" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Control Center</p>
                 </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-emerald-400/80 transition-colors duration-500">Capital</span>
-              </button>
+                <h2 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">
+                  App <span className="text-primary/70">Settings</span>
+                </h2>
+              </div>
+            </div>
 
-              {/* Pass */}
-              <button 
-                onClick={() => { setIsChangingPass(true); haptic('light'); }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-amber-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-amber-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-amber-500/40 transition-all duration-500 group-hover:bg-amber-500/10" />
-                  <Lock className="w-7 h-7 sm:w-9 sm:h-9 text-amber-500/40 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-amber-400/80 transition-colors duration-500">Security</span>
-              </button>
-
-              {/* Targets */}
-              <button 
-                onClick={() => { setIsEditingTargets(true); haptic('light'); }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-amber-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-amber-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-amber-500/40 transition-all duration-500 group-hover:bg-amber-500/10" />
-                  <Trophy className="w-7 h-7 sm:w-9 sm:h-9 text-amber-500/40 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-amber-400/80 transition-colors duration-500">Targets</span>
-              </button>
-
-              {/* Ingest */}
-              <button 
-                onClick={() => { fileInputRef.current?.click(); haptic('medium'); }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-blue-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-blue-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-blue-500/40 transition-all duration-500 group-hover:bg-blue-500/10" />
-                  {isImporting ? (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin relative z-10" />
-                  ) : (
-                    <FileSpreadsheet className="w-7 h-7 sm:w-9 sm:h-9 text-blue-500/40 group-hover:text-blue-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                  )}
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-blue-400/80 transition-colors duration-500">Ingest</span>
-              </button>
-
-              {/* Backup */}
-              <button 
-                onClick={() => { handleExportJSON(); haptic('medium'); }} 
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-amber-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-amber-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-amber-500/40 transition-all duration-500 group-hover:bg-amber-500/10" />
-                  <Download className="w-7 h-7 sm:w-9 sm:h-9 text-amber-500/40 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-amber-400/80 transition-colors duration-500">Backup</span>
-              </button>
-
-              {/* Restore */}
-              <label 
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90 cursor-pointer"
-                onClick={() => haptic('light')}
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-amber-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-amber-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-amber-500/40 transition-all duration-500 group-hover:bg-amber-500/10" />
-                  <Upload className="w-7 h-7 sm:w-9 sm:h-9 text-amber-500/40 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-amber-400/80 transition-colors duration-500">Restore</span>
-                <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
-              </label>
-
-              {/* About */}
-              <button 
-                onClick={() => { setShowAbout(true); haptic('medium'); }} 
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-primary/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-primary/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-primary/40 transition-all duration-500 group-hover:bg-primary/10" />
-                  <Info className="w-7 h-7 sm:w-9 sm:h-9 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-primary transition-colors duration-500">About</span>
-              </button>
-
-              {/* Notifications */}
-              <button 
-                onClick={() => { requestNotificationPermission(); haptic('medium'); }} 
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110",
-                    notificationsEnabled ? "bg-green-500/10 group-hover:bg-green-500/30" : "bg-primary/10 group-hover:bg-primary/30"
-                  )} />
-                  <div className={cn(
-                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md transition-all duration-500",
-                    notificationsEnabled ? "group-hover:border-green-500/40 group-hover:bg-green-500/10" : "group-hover:border-primary/40 group-hover:bg-primary/10"
-                  )} />
-                  <div className="relative z-10 flex items-center justify-center">
-                    {notificationsEnabled ? (
-                      <div className="relative">
-                        <Clock className="w-7 h-7 sm:w-9 sm:h-9 text-green-500/40 group-hover:text-green-400 group-hover:scale-110 transition-all duration-500" />
-                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black animate-pulse" />
-                      </div>
+            {/* Profile & Cloud Section */}
+            <div className="bg-white/[0.02] border border-white/[0.05] rounded-[2.5rem] p-6 backdrop-blur-md">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden">
+                    {user ? (
+                      <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <Clock className="w-7 h-7 sm:w-9 sm:h-9 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500" />
+                      <Cloud className="w-7 h-7 text-indigo-400" />
                     )}
                   </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1 h-1 rounded-full bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.3)]" />
+                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Identity</p>
+                    </div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                      {user ? (
+                        <>
+                          {user.displayName?.split(' ')[0]} <span className="text-indigo-500/50">{user.displayName?.split(' ').slice(1).join(' ') || 'Profile'}</span>
+                        </>
+                      ) : (
+                        <>Cloud <span className="text-indigo-500/50">Identity</span></>
+                      )}
+                    </h3>
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user ? user.email : 'Not Synchronized'}</p>
+                  </div>
                 </div>
-                <span className={cn(
-                  "text-[8px] sm:text-[11px] font-black uppercase tracking-widest transition-colors duration-500",
-                  notificationsEnabled ? "text-green-500/60 group-hover:text-green-400" : "text-white/40 group-hover:text-primary"
-                )}>
-                  {notificationsEnabled ? 'Active' : 'Alerts'}
-                </span>
+                <button 
+                  onClick={() => { user ? handleSignOut() : handleGoogleSignIn(); haptic('medium'); }}
+                  className={cn(
+                    "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+                    user ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-primary text-black"
+                  )}
+                >
+                  {user ? 'Sign Out' : 'Connect'}
+                </button>
+              </div>
+
+              {user && (
+                <button 
+                  onClick={() => { handleManualSync(); haptic('medium'); }}
+                  className="w-full py-4 bg-white/[0.03] border border-white/[0.05] rounded-2xl flex items-center justify-center gap-3 group active:scale-[0.98] transition-all"
+                >
+                  <RefreshCcw className={cn("w-4 h-4 text-emerald-400", isSyncing && "animate-spin")} />
+                  <span className="text-[10px] font-black text-white/60 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">
+                    {isSyncing ? 'Synchronizing Data...' : 'Manual Cloud Sync'}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Main Settings Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Capital Card */}
+              <button 
+                onClick={() => { setIsEditingInitial(true); haptic('medium'); }}
+                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+              >
+                <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                  <Wallet className="w-6 h-6 text-emerald-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500/40 shadow-[0_0_5px_rgba(16,185,129,0.3)]" />
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Ledger</p>
+                  </div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Capital <span className="text-emerald-500/50">Base</span></h4>
+                </div>
               </button>
 
-              {/* Cloud Sync (Gmail) */}
+              {/* Security Card */}
               <button 
-                onClick={() => {
-                  if (user) {
-                    handleManualSync();
-                  } else {
-                    handleGoogleSignIn();
-                  }
-                }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
+                onClick={() => { setIsChangingPass(true); haptic('medium'); }}
+                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
               >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110",
-                    user ? "bg-emerald-500/10 group-hover:bg-emerald-500/30" : "bg-indigo-500/10 group-hover:bg-indigo-500/30"
-                  )} />
-                  <div className={cn(
-                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md transition-all duration-500",
-                    user ? "group-hover:border-emerald-500/40 group-hover:bg-emerald-500/10" : "group-hover:border-indigo-500/40 group-hover:bg-indigo-500/10"
-                  )} />
-                  {isSyncing ? (
-                    <RefreshCcw className="w-7 h-7 sm:w-9 sm:h-9 text-indigo-400 animate-spin relative z-10" />
+                <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
+                  <Lock className="w-6 h-6 text-amber-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.3)]" />
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Access</p>
+                  </div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Security <span className="text-amber-500/50">Hub</span></h4>
+                </div>
+              </button>
+
+              {/* Targets Card */}
+              <button 
+                onClick={() => { setIsEditingTargets(true); haptic('medium'); }}
+                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+              >
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
+                  <Trophy className="w-6 h-6 text-blue-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="w-1 h-1 rounded-full bg-blue-500/40 shadow-[0_0_5px_rgba(59,130,246,0.3)]" />
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Ambition</p>
+                  </div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Profit <span className="text-blue-500/50">Goals</span></h4>
+                </div>
+              </button>
+
+              {/* Notifications Card */}
+              <button 
+                onClick={() => { requestNotificationPermission(); haptic('medium'); }}
+                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center border group-hover:scale-110 transition-transform",
+                  notificationsEnabled ? "bg-green-500/10 border-green-500/20" : "bg-primary/10 border-primary/20"
+                )}>
+                  {notificationsEnabled ? (
+                    <Bell className="w-6 h-6 text-green-500" />
                   ) : (
-                    <Cloud className={cn(
-                      "w-7 h-7 sm:w-9 sm:h-9 transition-all duration-500 relative z-10",
-                      user ? "text-emerald-500/40 group-hover:text-emerald-400 group-hover:scale-110" : "text-indigo-500/40 group-hover:text-indigo-400 group-hover:scale-110"
-                    )} />
+                    <BellOff className="w-6 h-6 text-primary" />
                   )}
                 </div>
-                <span className={cn(
-                  "text-[8px] sm:text-[11px] font-black uppercase tracking-widest transition-colors duration-500",
-                  user ? "text-emerald-400/80" : "text-white/40 group-hover:text-indigo-400/80"
-                )}>
-                  {user ? (isSyncing ? 'Syncing...' : 'Sync Now') : 'Cloud Sync'}
-                </span>
-                {user && (
-                  <span className="absolute -bottom-4 text-[7px] text-white/40 font-medium truncate max-w-[60px]">
-                    {user.email?.split('@')[0]}
-                  </span>
-                )}
+                <div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className={cn(
+                      "w-1 h-1 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.2)]",
+                      notificationsEnabled ? "bg-green-500/40" : "bg-primary/40"
+                    )} />
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Alerts</p>
+                  </div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest">System <span className={cn(notificationsEnabled ? "text-green-500/50" : "text-primary/50")}>Status</span></h4>
+                </div>
+              </button>
+            </div>
+
+            {/* Data Management Section */}
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => { handleExportJSON(); haptic('medium'); }}
+                className="p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center gap-3 group hover:bg-white/[0.05] transition-all active:scale-95"
+              >
+                <Download className="w-4 h-4 text-white/40 group-hover:text-blue-400 transition-colors" />
+                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Backup</span>
               </button>
 
-              {/* Wipe All Data */}
+              <label className="p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center gap-3 group hover:bg-white/[0.05] transition-all active:scale-95 cursor-pointer">
+                <Upload className="w-4 h-4 text-white/40 group-hover:text-purple-400 transition-colors" />
+                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Restore</span>
+                <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
+              </label>
+            </div>
+
+            {/* Danger Zone Section */}
+            <div className="space-y-3">
+              <button 
+                onClick={() => { setShowAbout(true); haptic('medium'); }}
+                className="w-full p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center justify-between group hover:bg-white/[0.05] transition-all active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
+                    <Info className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <div className="w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_5px_rgba(212,175,55,0.2)]" />
+                      <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/10">Information</p>
+                    </div>
+                    <span className="text-xs font-black text-white/70 uppercase tracking-widest">About <span className="text-primary/50">Fox Trade</span></span>
+                  </div>
+                </div>
+                <Sparkles className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
+              </button>
+
               <button 
                 onClick={() => { 
                   haptic('heavy'); 
@@ -1727,58 +1743,51 @@ function App() {
                     message: 'Are you absolutely sure? This will permanently delete ALL trade records and reset capital settings.'
                   });
                 }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
+                className="w-full p-5 bg-red-500/5 border border-red-500/10 rounded-3xl flex items-center justify-between group hover:bg-red-500/10 transition-all active:scale-[0.99]"
               >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-rose-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-rose-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-125" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-rose-500/40 transition-all duration-500 group-hover:bg-rose-500/10" />
-                  <Trash2 className="w-7 h-7 sm:w-9 sm:h-9 text-rose-500/40 group-hover:text-rose-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20">
+                    <Trash2 className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <div className="w-1 h-1 rounded-full bg-red-500/40 shadow-[0_0_5px_rgba(239,68,68,0.2)]" />
+                      <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/10">Maintenance</p>
+                    </div>
+                    <span className="text-xs font-black text-red-500/70 uppercase tracking-widest">Wipe <span className="text-red-500/50">All Data</span></span>
+                  </div>
                 </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-rose-400/80 transition-colors duration-500">Wipe All</span>
+                <AlertTriangle className="w-5 h-5 text-red-500/20 group-hover:animate-pulse" />
               </button>
-            </div>
 
-            {/* Auth Button (Sign In / Sign Out) */}
-            <div className="mt-24 sm:mt-32 pb-8 flex flex-col items-center">
-              <div className="w-full max-w-[200px] h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent mb-12" />
               <button 
                 onClick={() => { 
-                  if (user) {
-                    handleSignOut();
-                  } else {
-                    handleGoogleSignIn();
-                  }
                   haptic('heavy'); 
+                  setConfirmAction({
+                    type: 'reload',
+                    title: 'System Reload',
+                    message: 'Force refreshing the application will clear all temporary cache. Proceed?'
+                  });
                 }}
-                className="group relative flex flex-col items-center gap-4 transition-all duration-500 active:scale-95"
+                className="w-full p-5 bg-sky-500/5 border border-sky-500/10 rounded-3xl flex items-center justify-between group hover:bg-sky-500/10 transition-all active:scale-[0.99]"
               >
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                  <div className={cn(
-                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-full backdrop-blur-xl transition-all duration-500",
-                    user ? "group-hover:border-red-500/20 group-hover:bg-red-500/5" : "group-hover:border-primary/20 group-hover:bg-primary/5"
-                  )} />
-                  {user ? (
-                    <LogOut className="w-9 h-9 sm:w-11 sm:h-11 text-red-500/40 group-hover:text-red-500 transition-all duration-500 relative z-10" />
-                  ) : (
-                    <Sparkles className="w-9 h-9 sm:w-11 sm:h-11 text-primary/40 group-hover:text-primary transition-all duration-500 relative z-10" />
-                  )}
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-sky-500/10 rounded-xl flex items-center justify-center border border-sky-500/20">
+                    <RotateCcw className="w-5 h-5 text-sky-500" />
+                  </div>
+                  <span className="text-xs font-black text-sky-500/70 uppercase tracking-widest">Force Update</span>
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <span className={cn(
-                    "text-[10px] sm:text-[13px] font-black uppercase tracking-[0.4em] transition-colors duration-500",
-                    user ? "text-white/40 group-hover:text-red-500" : "text-white/40 group-hover:text-primary"
-                  )}>
-                    {user ? 'Sign Out' : 'Sign In'}
-                  </span>
-                  <div className={cn(
-                    "w-0 group-hover:w-full h-[1px] transition-all duration-500 rounded-full",
-                    user ? "bg-red-500/50" : "bg-primary/50"
-                  )} />
-                </div>
+                <RefreshCcw className="w-5 h-5 text-sky-500/20 group-hover:rotate-180 transition-transform duration-700" />
               </button>
             </div>
 
-            {/* About Modal */}
+            {/* Footer Credits */}
+            <div className="pt-12 flex flex-col items-center opacity-20">
+              <p className="text-[8px] font-black uppercase tracking-[0.6em] text-white">MAK GROUP SYSTEMS</p>
+              <p className="text-[6px] font-bold uppercase tracking-[0.4em] text-white/50 mt-2">Precision Trading Intelligence © 2026</p>
+            </div>
+
+            {/* Modals follow below as they are state-driven */}
             {showAbout && (
               <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-500">
                 <div className="relative w-full max-w-sm bg-[#0A0A0C] border border-white/[0.05] rounded-[2.5rem] p-10 shadow-2xl overflow-hidden animate-in zoom-in duration-300">
@@ -2008,14 +2017,14 @@ function App() {
       />
 
       {/* Main Content Area */}
-       <main className="flex-1 overflow-y-auto relative z-10 pt-[calc(env(safe-area-inset-top)+2rem)] px-4 sm:px-6 custom-scroll pb-44">
+       <main className="flex-1 overflow-y-auto relative z-10 pt-[calc(env(safe-area-inset-top)+2rem)] px-4 sm:px-6 custom-scroll pb-32">
         <div className="relative z-10 max-w-[1400px] mx-auto">
           {renderTabContent()}
         </div>
       </main>
 
       {/* iOS 26 Tab Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/[0.01] backdrop-blur-[50px] border-t border-white/[0.08] px-2 sm:px-8 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 flex items-center justify-between shadow-[0_-20px_50px_rgba(0,0,0,0.4)]">
+      <nav className="fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 bg-black/40 backdrop-blur-2xl border border-white/10 px-2 py-2 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2.5rem]">
         <button onClick={() => { setActiveTab('home'); haptic('light'); }} className="flex-1 flex justify-center group py-1">
           <div className={cn(
             "p-2.5 sm:p-3.5 transition-all duration-300 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center min-w-[50px] sm:min-w-[70px]",
@@ -2038,10 +2047,10 @@ function App() {
         </button>
 
         {/* Central Add Button (Now MT5 Import) */}
-        <div className="flex-1 flex items-center justify-center -mt-8 sm:-mt-12">
+        <div className="flex-1 flex items-center justify-center -mt-10 sm:-mt-14">
           <button 
             onClick={() => { fileInputRef.current?.click(); haptic('medium'); }}
-            className="w-16 h-16 sm:w-20 sm:h-20 bg-white/[0.03] backdrop-blur-[40px] rounded-[1.8rem] sm:rounded-[2.2rem] p-3 sm:p-4 border border-white/[0.12] shadow-[0_20px_40px_rgba(0,0,0,0.6)] active:scale-90 transition-all duration-300 flex items-center justify-center group relative overflow-hidden"
+            className="w-16 h-16 sm:w-20 sm:h-20 bg-white/[0.05] backdrop-blur-[40px] rounded-[2rem] sm:rounded-[2.5rem] p-3 sm:p-4 border border-white/[0.15] shadow-[0_15px_35px_rgba(0,0,0,0.6)] active:scale-90 transition-all duration-300 flex items-center justify-center group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
             <img 
@@ -2225,10 +2234,6 @@ function App() {
           </div>
         </>
       )}
-
-      {/* System Stats Footer */}
-      <div className="mt-12 mb-24 flex flex-col items-center gap-4">
-      </div>
     </div>
   );
 }
