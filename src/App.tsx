@@ -5,7 +5,7 @@ import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
 import * as XLSX from 'xlsx';
 import { toPng } from 'html-to-image';
-import { calculateStatistics, getPeriodStats, getSmartInsights } from './lib/statistics';
+import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
 const logo = "app-logo-new.png";
 import { LockScreen } from './components/LockScreen';
@@ -42,6 +42,13 @@ function App() {
   const shareCardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
 
   const sessions = useMemo(() => {
     const getSessionStatus = (start: number, end: number, current: number) => {
@@ -486,6 +493,7 @@ function App() {
 
   const stats = useMemo(() => calculateStatistics(records, initialCapital), [records, initialCapital]);
   const periodStats = useMemo(() => getPeriodStats(records), [records]);
+  const sessionStats = useMemo(() => calculateSessionStats(reportTrades), [reportTrades]);
   const insights = useMemo(() => getSmartInsights(records, reportTrades), [records, reportTrades]);
 
   const targetProgress = useMemo(() => {
@@ -1270,6 +1278,7 @@ function App() {
               periodStats={periodStats} 
               records={records} 
               initialCapital={initialCapital} 
+              sessionStats={sessionStats}
             />
           </div>
         );

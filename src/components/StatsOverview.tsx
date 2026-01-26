@@ -1,5 +1,5 @@
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import { type Statistics, type PeriodStats } from '../lib/statistics';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, YAxis } from 'recharts';
+import { type Statistics, type PeriodStats, type SessionStats } from '../lib/statistics';
 import { cn } from '../lib/utils';
 import { TradeChart } from './TradeChart';
 import { type DailyRecord } from '../types';
@@ -8,6 +8,7 @@ import { haptic } from '../lib/utils';
 interface StatsOverviewProps {
   stats: Statistics;
   records: DailyRecord[];
+  sessionStats: SessionStats[];
   periodStats: {
     weekly: PeriodStats[];
     monthly: PeriodStats[];
@@ -16,7 +17,7 @@ interface StatsOverviewProps {
   initialCapital: number;
 }
 
-export function StatsOverview({ stats, periodStats, records, initialCapital }: StatsOverviewProps) {
+export function StatsOverview({ stats, periodStats, records, initialCapital, sessionStats }: StatsOverviewProps) {
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 px-4">
       
@@ -241,6 +242,75 @@ export function StatsOverview({ stats, periodStats, records, initialCapital }: S
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* Session Profitability Analysis */}
+      <div className="bg-white/[0.01] backdrop-blur-[40px] border border-white/[0.05] rounded-[1.8rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-2xl relative group">
+        {/* Background Decorative Glow */}
+        <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/5 blur-[60px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-all duration-700" />
+        
+        <div className="mb-8 flex flex-row items-center justify-between gap-2 relative z-10">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5">
+              <div className="w-1 h-1 rounded-full bg-primary/60 shadow-[0_0_8px_rgba(212,175,55,0.4)]" />
+              <p className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/10">Time Distribution</p>
+            </div>
+            <h3 className="text-base sm:text-2xl font-black text-white tracking-tighter leading-tight">
+              Session <span className="text-primary/70">Profitability</span>
+            </h3>
+          </div>
+          <div className="flex gap-4 sm:gap-6">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-green-500/50" />
+              <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Profitable</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500/50" />
+              <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Loss Making</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
+          {sessionStats.map((session) => (
+            <div 
+              key={session.label}
+              className="p-6 sm:p-8 rounded-[2rem] bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-all group relative overflow-hidden flex flex-col justify-between min-h-[180px]"
+            >
+              <div className="flex justify-between items-center mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    session.profit >= 0 ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+                  )} />
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-primary/60 transition-colors">
+                    {session.label} Session
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-4 relative z-10">
+                <span className={cn(
+                  "text-2xl sm:text-4xl font-black tracking-tighter block",
+                  session.profit >= 0 ? "text-green-500/80" : "text-red-500/80"
+                )}>
+                  {session.profit >= 0 ? '+' : ''}{session.profit.toLocaleString()}$
+                </span>
+                
+                <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
+                  <div className="space-y-1">
+                    <p className="text-[8px] sm:text-[10px] font-bold text-white/10 uppercase tracking-widest">Efficiency</p>
+                    <p className="text-base sm:text-lg font-black text-white/90">{Math.round(session.winRate)}%</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-[8px] sm:text-[10px] font-bold text-white/10 uppercase tracking-widest">Volume</p>
+                    <p className="text-base sm:text-lg font-black text-white/90">{session.count}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

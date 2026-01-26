@@ -31,6 +31,46 @@ export interface PeriodStats {
   count: number;
 }
 
+export interface SessionStats {
+  label: string;
+  profit: number;
+  count: number;
+  winRate: number;
+}
+
+export const calculateSessionStats = (trades: MT5Trade[]): SessionStats[] => {
+  const sessionStats: Record<string, { profit: number, count: number, wins: number }> = {
+    'Asian': { profit: 0, count: 0, wins: 0 },
+    'London': { profit: 0, count: 0, wins: 0 },
+    'New York': { profit: 0, count: 0, wins: 0 },
+    'Night': { profit: 0, count: 0, wins: 0 }
+  };
+
+  trades.forEach(t => {
+    // Expected format: "2024.01.26 14:30:00"
+    const hour = parseInt(t.closeTime.split(' ')[1]?.split(':')[0] || '0');
+    let session = '';
+    
+    // Standard session hours (UTC approximate)
+    if (hour >= 0 && hour < 8) session = 'Asian';
+    else if (hour >= 8 && hour < 13) session = 'London';
+    else if (hour >= 13 && hour < 21) session = 'New York';
+    else session = 'Night';
+
+    const netProfit = t.profit + (t.commission || 0) + (t.swap || 0);
+    sessionStats[session].profit += netProfit;
+    sessionStats[session].count += 1;
+    if (netProfit > 0) sessionStats[session].wins += 1;
+  });
+
+  return Object.entries(sessionStats).map(([label, stats]) => ({
+    label,
+    profit: parseFloat(stats.profit.toFixed(2)),
+    count: stats.count,
+    winRate: stats.count > 0 ? (stats.wins / stats.count) * 100 : 0
+  }));
+};
+
 export const getSmartInsights = (records: DailyRecord[], reportTrades: MT5Trade[] = []): SmartInsight[] => {
   const insights: SmartInsight[] = [];
   if (records.length < 3) return insights;
@@ -70,33 +110,27 @@ export const getSmartInsights = (records: DailyRecord[], reportTrades: MT5Trade[
 
   // 3. Time-based Analysis (If MT5 trades available)
   if (reportTrades.length > 0) {
-    const sessionStats: Record<string, { profit: number, count: number }> = {
-      'Morning (Asian)': { profit: 0, count: 0 },
-      'Afternoon (London)': { profit: 0, count: 0 },
-      'Evening (New York)': { profit: 0, count: 0 },
-      'Night': { profit: 0, count: 0 }
-    };
+    const sessionData = calculateSessionStats(reportTrades);
+    const bestSession = sessionData.reduce((a, b) => b.profit > a.profit ? b : a);
+    const worstSession = sessionData.reduce((a, b) => b.profit < a.profit ? b : a);
 
-    reportTrades.forEach(t => {
-      const hour = parseInt(t.closeTime.split(' ')[1].split(':')[0]);
-      let session = '';
-      if (hour >= 2 && hour < 10) session = 'Morning (Asian)';
-      else if (hour >= 10 && hour < 16) session = 'Afternoon (London)';
-      else if (hour >= 16 && hour < 22) session = 'Evening (New York)';
-      else session = 'Night';
-
-      sessionStats[session].profit += t.profit;
-      sessionStats[session].count += 1;
-    });
-
-    const bestSession = Object.entries(sessionStats).reduce((a, b) => b[1].profit > a[1].profit ? b : a);
-    if (bestSession[1].profit > 0) {
+    if (bestSession.profit > 0) {
       insights.push({
         type: 'info',
         title: 'Session Mastery',
-        message: `Your edge is strongest during the ${bestSession[0]} session.`,
-        value: bestSession[0],
+        message: `Your edge is strongest during the ${bestSession.label} session.`,
+        value: bestSession.label,
         icon: 'Clock'
+      });
+    }
+
+    if (worstSession.profit < 0) {
+      insights.push({
+        type: 'warning',
+        title: 'Session Warning',
+        message: `Performance drops during the ${worstSession.label} session. Stay vigilant.`,
+        value: worstSession.label,
+        icon: 'AlertTriangle'
       });
     }
   }

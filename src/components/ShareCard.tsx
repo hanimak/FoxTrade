@@ -74,7 +74,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
           )}>
             {isPositive ? <TrendingUp className="w-16 h-16" /> : <TrendingDown className="w-16 h-16" />}
             <span className="text-7xl font-black tracking-tight">
-              {isPositive ? '+' : ''}{data.growthPercentage}% Growth
+              {isPositive ? '+' : ''}{data.growthPercentage.toFixed(1)}% Growth
             </span>
           </div>
         </div>
@@ -85,9 +85,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
             <div className="p-6 bg-primary/10 rounded-3xl">
               <Trophy className="w-14 h-14 text-primary" />
             </div>
-            <div className="text-center">
+            <div className="text-center w-full overflow-hidden">
               <p className="text-3xl font-black text-white/20 uppercase tracking-widest mb-2">Win Rate</p>
-              <p className="text-7xl font-black text-white">{data.winRate}%</p>
+              <p className="text-7xl font-black text-white truncate px-2">{Math.round(data.winRate)}%</p>
             </div>
           </div>
 
@@ -95,9 +95,9 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
             <div className="p-6 bg-amber-500/10 rounded-3xl">
               <Sparkles className="w-14 h-14 text-amber-500" />
             </div>
-            <div className="text-center">
+            <div className="text-center w-full overflow-hidden">
               <p className="text-3xl font-black text-white/20 uppercase tracking-widest mb-2">Health Score</p>
-              <p className="text-7xl font-black text-white">{data.healthScore}%</p>
+              <p className="text-7xl font-black text-white truncate px-2">{Math.round(data.healthScore)}%</p>
             </div>
           </div>
         </div>
