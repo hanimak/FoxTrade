@@ -1525,26 +1525,6 @@ function App() {
                 )}
               </button>
 
-              {/* Refresh System */}
-              <button 
-                onClick={() => {
-                  haptic('medium');
-                  setConfirmAction({
-                    type: 'reload',
-                    title: 'System Reload',
-                    message: 'This will refresh the application state. Current session data may be reset.'
-                  });
-                }}
-                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
-              >
-                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-sky-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-sky-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-sky-500/40 transition-all duration-500 group-hover:bg-sky-500/10" />
-                  <RotateCcw className="w-7 h-7 sm:w-9 sm:h-9 text-sky-500/40 group-hover:text-sky-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
-                </div>
-                <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-sky-400/80 transition-colors duration-500">Refresh</span>
-              </button>
-
               {/* Wipe All Data */}
               <button 
                 onClick={() => { 
@@ -1558,7 +1538,7 @@ function App() {
                 className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
               >
                 <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-rose-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-rose-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-rose-500/10 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl group-hover:bg-rose-500/30 transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-125" />
                   <div className="absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md group-hover:border-rose-500/40 transition-all duration-500 group-hover:bg-rose-500/10" />
                   <Trash2 className="w-7 h-7 sm:w-9 sm:h-9 text-rose-500/40 group-hover:text-rose-400 group-hover:scale-110 transition-all duration-500 relative z-10" />
                 </div>
