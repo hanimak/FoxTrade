@@ -1616,17 +1616,13 @@ function App() {
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
                   <div className={cn(
-                    "absolute inset-0 rounded-full blur-2xl transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-125",
-                    user ? "bg-red-500/20 group-hover:bg-red-500/40" : "bg-primary/20 group-hover:bg-primary/40"
-                  )} />
-                  <div className={cn(
-                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-full backdrop-blur-xl transition-all duration-500 shadow-2xl",
-                    user ? "group-hover:border-red-500/40 group-hover:bg-red-500/10" : "group-hover:border-primary/40 group-hover:bg-primary/10"
+                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-full backdrop-blur-xl transition-all duration-500",
+                    user ? "group-hover:border-red-500/20 group-hover:bg-red-500/5" : "group-hover:border-primary/20 group-hover:bg-primary/5"
                   )} />
                   {user ? (
-                    <LogOut className="w-9 h-9 sm:w-11 sm:h-11 text-red-500/40 group-hover:text-red-500 group-hover:scale-110 transition-all duration-500 relative z-10 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                    <LogOut className="w-9 h-9 sm:w-11 sm:h-11 text-red-500/40 group-hover:text-red-500 transition-all duration-500 relative z-10" />
                   ) : (
-                    <Sparkles className="w-9 h-9 sm:w-11 sm:h-11 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500 relative z-10 drop-shadow-[0_0_8px_rgba(255,184,0,0.4)]" />
+                    <Sparkles className="w-9 h-9 sm:w-11 sm:h-11 text-primary/40 group-hover:text-primary transition-all duration-500 relative z-10" />
                   )}
                 </div>
                 <div className="flex flex-col items-center gap-1">
