@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { toPng } from 'html-to-image';
 import { calculateStatistics, getPeriodStats, getSmartInsights } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
-const logo = "/app-logo-new.png";
+const logo = "app-logo-new.png";
 import { LockScreen } from './components/LockScreen';
 import { BackgroundSplitLogo } from './components/BackgroundSplitLogo';
 import { ShareCard } from './components/ShareCard';

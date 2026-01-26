@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Delete, ShieldCheck } from 'lucide-react';
 import { cn, haptic } from '../lib/utils';
-const logo = "/app-logo-new.png";
+const logo = "app-logo-new.png";
 import { BackgroundSplitLogo } from './BackgroundSplitLogo';
 
 interface LockScreenProps {
