@@ -1565,21 +1565,21 @@ function App() {
 
             {/* Profile & Cloud Section */}
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-[2.5rem] p-6 backdrop-blur-md">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden">
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
                     {user ? (
                       <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <Cloud className="w-7 h-7 text-indigo-400" />
                     )}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1 h-1 rounded-full bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.3)]" />
                       <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Identity</p>
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider truncate">
                       {user ? (
                         <>
                           {user.displayName?.split(' ')[0]} <span className="text-indigo-500/50">{user.displayName?.split(' ').slice(1).join(' ') || 'Profile'}</span>
@@ -1588,17 +1588,17 @@ function App() {
                         <>Cloud <span className="text-indigo-500/50">Identity</span></>
                       )}
                     </h3>
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user ? user.email : 'Not Synchronized'}</p>
+                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest truncate">{user ? user.email : 'Not Synchronized'}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => { user ? handleSignOut() : handleGoogleSignIn(); haptic('medium'); }}
                   className={cn(
-                    "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+                    "w-full sm:w-auto px-6 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
                     user ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-primary text-black"
                   )}
                 >
-                  {user ? 'Sign Out' : 'Connect'}
+                  {user ? 'Sign Out' : 'Connect Account'}
                 </button>
               </div>
 
