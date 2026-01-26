@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-// Force Update v20.0
+// Force Update v36.0
 import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles } from 'lucide-react';
 import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
@@ -42,13 +42,56 @@ function App() {
   const shareCardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    return 'Notification' in window && Notification.permission === 'granted';
+  });
+
+  // Function to send local notifications
+  const sendNotification = (title: string, body: string) => {
+    if (notificationsEnabled && 'Notification' in window) {
+      new Notification(title, {
+        body,
+        icon: logo
+      });
+      haptic('medium');
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+      alert('هذا المتصفح لا يدعم الإشعارات.');
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      setNotificationsEnabled(true);
+      sendNotification('تم تفعيل الإشعارات', 'ستصلك الآن تنبيهات بخصوص جلسات التداول والمزامنة.');
+    } else {
+      setNotificationsEnabled(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date());
+      const now = new Date();
+      const prevMinute = currentTime.getMinutes();
+      setCurrentTime(now);
+
+      // Check for market session starts only if minute changed
+      if (now.getMinutes() !== prevMinute && notificationsEnabled) {
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+
+        // Market session starts (Beirut Time)
+        if (hour === 11 && minute === 0) sendNotification('بورصة لندن', 'جلسة لندن بدأت الآن! وقت السيولة.');
+        if (hour === 16 && minute === 0) sendNotification('بورصة نيويورك', 'جلسة نيويورك بدأت الآن! استعد للتحركات القوية.');
+        if (hour === 3 && minute === 0) sendNotification('بورصة طوكيو', 'جلسة طوكيو بدأت الآن.');
+        if (hour === 1 && minute === 0) sendNotification('بورصة سيدني', 'جلسة سيدني بدأت الآن.');
+      }
     }, 60000); // Update every minute
     return () => clearInterval(timer);
-  }, []);
+  }, [currentTime, notificationsEnabled]);
 
   const [records, setRecords] = useState<DailyRecord[]>(() => {
     const saved = localStorage.getItem('trade_records');
@@ -207,6 +250,11 @@ function App() {
             setIsSyncing(true); // Temporarily block outgoing sync to prevent loops
             
             if (cloudData.records) {
+              const oldLength = records.length;
+              const newLength = cloudData.records.length;
+              if (newLength > oldLength) {
+                sendNotification('تحديث التداول', `تمت إضافة ${newLength - oldLength} صفقات جديدة من الروبوت.`);
+              }
               setRecords(cloudData.records);
               localStorage.setItem('trade_records', JSON.stringify(cloudData.records));
             }
@@ -272,8 +320,8 @@ function App() {
 
   useEffect(() => {
     // Force cache refresh by checking version
-    // Fresh Start Version v35.8
-    const CURRENT_VERSION = 'v35.8';
+    // Fresh Start Version v36.0
+    const CURRENT_VERSION = 'v36.0';
     const savedVersion = localStorage.getItem('app_version');
     if (savedVersion !== CURRENT_VERSION) {
       localStorage.setItem('app_version', CURRENT_VERSION);
@@ -1399,6 +1447,39 @@ function App() {
                   <Info className="w-7 h-7 sm:w-9 sm:h-9 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500 relative z-10" />
                 </div>
                 <span className="text-[8px] sm:text-[11px] font-black uppercase tracking-widest text-white/40 group-hover:text-primary transition-colors duration-500">About</span>
+              </button>
+
+              {/* Notifications */}
+              <button 
+                onClick={() => { requestNotificationPermission(); haptic('medium'); }} 
+                className="group relative flex flex-col items-center gap-3 sm:gap-4 transition-all duration-500 active:scale-90"
+              >
+                <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
+                  <div className={cn(
+                    "absolute inset-0 rounded-2xl sm:rounded-3xl blur-lg sm:blur-xl transition-all duration-700 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-110",
+                    notificationsEnabled ? "bg-green-500/10 group-hover:bg-green-500/30" : "bg-primary/10 group-hover:bg-primary/30"
+                  )} />
+                  <div className={cn(
+                    "absolute inset-0 bg-white/[0.02] border border-white/[0.05] rounded-2xl sm:rounded-3xl backdrop-blur-md transition-all duration-500",
+                    notificationsEnabled ? "group-hover:border-green-500/40 group-hover:bg-green-500/10" : "group-hover:border-primary/40 group-hover:bg-primary/10"
+                  )} />
+                  <div className="relative z-10 flex items-center justify-center">
+                    {notificationsEnabled ? (
+                      <div className="relative">
+                        <Clock className="w-7 h-7 sm:w-9 sm:h-9 text-green-500/40 group-hover:text-green-400 group-hover:scale-110 transition-all duration-500" />
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black animate-pulse" />
+                      </div>
+                    ) : (
+                      <Clock className="w-7 h-7 sm:w-9 sm:h-9 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500" />
+                    )}
+                  </div>
+                </div>
+                <span className={cn(
+                  "text-[8px] sm:text-[11px] font-black uppercase tracking-widest transition-colors duration-500",
+                  notificationsEnabled ? "text-green-500/60 group-hover:text-green-400" : "text-white/40 group-hover:text-primary"
+                )}>
+                  {notificationsEnabled ? 'Active' : 'Alerts'}
+                </span>
               </button>
 
               {/* Cloud Sync (Gmail) */}
