@@ -1,6 +1,11 @@
 import React, { useEffect, useRef } from 'react';
+import { cn } from '../lib/utils';
 
-const LivePriceTicker: React.FC = () => {
+interface LivePriceTickerProps {
+  theme?: 'light' | 'dark';
+}
+
+const LivePriceTicker: React.FC<LivePriceTickerProps> = ({ theme = 'dark' }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef(`tv-widget-${Math.random().toString(36).substr(2, 9)}`);
 
@@ -28,7 +33,7 @@ const LivePriceTicker: React.FC = () => {
         { "proName": "OANDA:BCOUSD", "title": "OIL" }
       ],
       "showSymbolLogo": false,
-      "colorTheme": "dark",
+      "colorTheme": theme,
       "isTransparent": true,
       "displayMode": "regular",
       "locale": "en"
@@ -41,14 +46,17 @@ const LivePriceTicker: React.FC = () => {
         currentContainer.innerHTML = '';
       }
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div className="w-full px-4 mb-8 animate-fade-in">
       <div className="max-w-[1400px] mx-auto">
         <div className="relative group">
           {/* Glass Card Container - Fixed Height and Overflow */}
-          <div className="relative bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-xl h-[40px] flex items-center shadow-lg overflow-hidden">
+          <div className={cn(
+            "relative backdrop-blur-xl border rounded-xl h-[40px] flex items-center shadow-lg overflow-hidden transition-all duration-300",
+            theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.02] border-white/[0.05]"
+          )}>
             
             {/* Cyberpunk Accents */}
             <div className="absolute inset-y-0 left-0 w-1 bg-primary/40 z-[30]" />
@@ -63,7 +71,10 @@ const LivePriceTicker: React.FC = () => {
             </div>
 
             {/* Logo Mask Layer - Absolute bottom protection */}
-            <div className="absolute bottom-0 left-0 w-full h-[12px] bg-[#050505] z-[25]" />
+            <div className={cn(
+              "absolute bottom-0 left-0 w-full h-[12px] z-[25]",
+              theme === 'light' ? "bg-white/90" : "bg-[#050505]"
+            )} />
           </div>
         </div>
       </div>
@@ -87,7 +98,7 @@ const LivePriceTicker: React.FC = () => {
           height: 72px !important;
           margin: 0 !important;
           padding: 0 !important;
-          filter: contrast(1.1) brightness(1.2);
+          filter: ${theme === 'light' ? 'contrast(0.8) brightness(0.9) grayscale(0.2)' : 'contrast(1.1) brightness(1.2)'};
           pointer-events: none !important;
           transform: translateY(1px) !important;
         }

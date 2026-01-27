@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 // Force Update v36.0
-import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, FileDown, FileUp, ExternalLink, ChevronRight } from 'lucide-react';
+import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, FileDown, FileUp, ExternalLink, ChevronRight, Sun, Moon } from 'lucide-react';
 import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
 import * as XLSX from 'xlsx';
@@ -9,7 +9,6 @@ import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSession
 import { StatsOverview } from './components/StatsOverview';
 const logo = "app-logo-new.png";
 import { LockScreen } from './components/LockScreen';
-import { BackgroundSplitLogo } from './components/BackgroundSplitLogo';
 import { ShareCard } from './components/ShareCard';
 import LivePriceTicker from './components/LivePriceTicker';
 import { 
@@ -32,6 +31,35 @@ type Tab = 'home' | 'analytics' | 'reports' | 'settings';
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isLocked, setIsLocked] = useState(true);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('app_theme');
+      return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+    } catch (e) {
+      return 'dark';
+    }
+  });
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('app_theme', newTheme);
+    haptic('medium');
+    
+    if (newTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  };
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [theme]);
   const [, setPassword] = useState(() => localStorage.getItem('app_passcode') || '2525');
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -209,8 +237,12 @@ function App() {
   });
 
   const [currentCapital, setCurrentCapital] = useState<number>(initialCapital);
+  const [isAddingWithdrawal, setIsAddingWithdrawal] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalNote, setWithdrawalNote] = useState('');
   const [isEditingInitial, setIsEditingInitial] = useState(false);
   const [isEditingTargets, setIsEditingTargets] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
 
   const [showTargetsOnHome, setShowTargetsOnHome] = useState(() => {
     const saved = localStorage.getItem('show_targets_on_home');
@@ -505,6 +537,7 @@ function App() {
       startOfWeek.setUTCHours(0, 0, 0, 0);
       
       return records.reduce((sum, record) => {
+        if (record.type === 'withdrawal') return sum;
         const recordDate = new Date(record.date);
         if (recordDate.getTime() >= startOfWeek.getTime()) {
           return sum + record.profitLoss;
@@ -519,6 +552,7 @@ function App() {
       const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
       
       return records.reduce((sum, record) => {
+        if (record.type === 'withdrawal') return sum;
         const recordDate = new Date(record.date);
         if (recordDate.getTime() >= startOfMonth.getTime()) {
           return sum + record.profitLoss;
@@ -555,7 +589,7 @@ function App() {
     // Average daily profit over the last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentRecords = records.filter(r => new Date(r.date) >= thirtyDaysAgo);
+    const recentRecords = records.filter(r => r.type !== 'withdrawal' && new Date(r.date) >= thirtyDaysAgo);
     const avgDailyProfit = recentRecords.length > 0 
       ? recentRecords.reduce((acc, curr) => acc + curr.profitLoss, 0) / 30 
       : 0;
@@ -584,6 +618,43 @@ function App() {
     link.download = `fox-trade-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const addWithdrawal = () => {
+    const amount = parseFloat(withdrawalAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
+
+    const newRecord: DailyRecord = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      profitLoss: -amount, // Withdrawal is a deduction
+      capitalBefore: currentCapital,
+      capitalAfter: currentCapital - amount,
+      notes: withdrawalNote || 'Profit Withdrawal',
+      type: 'withdrawal'
+    };
+
+    setRecords(prev => [newRecord, ...prev]);
+    setIsAddingWithdrawal(false);
+    setWithdrawalAmount('');
+    setWithdrawalNote('');
+    haptic('heavy');
+  };
+
+  const deleteRecord = (id: string) => {
+    setRecordToDelete(id);
+    haptic('medium');
+  };
+
+  const confirmDelete = () => {
+    if (recordToDelete) {
+      setRecords(prev => prev.filter(r => r.id !== recordToDelete));
+      setRecordToDelete(null);
+      haptic('heavy');
+    }
   };
 
   const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -946,11 +1017,11 @@ function App() {
         return (
           <div className="space-y-6 animate-fade-in pb-32">
             {/* Live Prices Ticker */}
-            <LivePriceTicker />
+            <LivePriceTicker theme={theme} />
 
             {/* Unique Genius Net Worth Card */}
             <div className="relative group px-4 sm:px-0">
-              <div className="relative overflow-hidden bg-white/[0.01] border border-white/[0.05] rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:pt-6 sm:pb-10 shadow-2xl backdrop-blur-sm">
+              <div className="ios-card sm:pt-6 sm:pb-10 shadow-2xl">
                 {/* Share Button - Absolute Corner Positioning (Desktop) & Top Center (Mobile) */}
                 <div className="absolute top-3 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:top-4 sm:right-4 z-50">
                   <button 
@@ -958,21 +1029,25 @@ function App() {
                     disabled={isSharing}
                     className={cn(
                       "flex items-center justify-center gap-2 px-6 py-1.5 sm:p-3 rounded-full sm:rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-300 active:scale-95",
+                      theme === 'light' && "bg-black/[0.02] border-black/[0.05]",
                       isSharing && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     {isSharing ? (
                       <RefreshCcw className="w-3.5 h-3.5 text-primary animate-spin" />
                     ) : (
-                      <Share2 className="w-3.5 h-3.5 text-white/20 transition-colors" />
+                      <Share2 className={cn("w-3.5 h-3.5 transition-colors", theme === 'light' ? "text-slate-900/20" : "text-white/20")} />
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 sm:hidden">Share</span>
+                    <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] sm:hidden", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Share</span>
                   </button>
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center text-center space-y-4 sm:space-y-8 pt-12 sm:pt-0">
                    {/* Vertical Side Label - Hidden on small mobile */}
-                   <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 hidden xs:flex items-center justify-center bg-white/[0.02] border-r border-white/[0.05] backdrop-blur-md rounded-l-[2rem] sm:rounded-l-[2.5rem] overflow-hidden z-20">
+                   <div className={cn(
+                     "absolute left-0 top-0 bottom-0 w-8 sm:w-12 hidden xs:flex items-center justify-center border-r backdrop-blur-md rounded-l-[2.5rem] overflow-hidden z-20",
+                     theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]"
+                   )}>
                      <div className="-rotate-90 whitespace-nowrap">
                        <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-primary/80 select-none drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
                          Dynamic Portfolio
@@ -992,12 +1067,12 @@ function App() {
                             "p-1.5 rounded-lg border transition-all duration-300 flex flex-col items-center",
                             session.active 
                               ? "bg-primary/10 border-primary/20 shadow-[0_0_10px_rgba(212,175,55,0.05)]" 
-                              : "bg-white/[0.01] border-white/[0.05] opacity-30"
+                              : theme === 'light' ? "bg-black/[0.01] border-black/[0.05] opacity-30" : "bg-white/[0.01] border-white/[0.05] opacity-30"
                           )}>
                             <div className="flex items-center gap-1.5 mb-0">
                               <span className={cn(
                                 "text-[8px] font-black uppercase tracking-tight",
-                                session.active ? "text-primary" : "text-white/30"
+                                session.active ? "text-primary" : theme === 'light' ? "text-slate-900/30" : "text-white/30"
                               )}>
                                 {session.name}
                               </span>
@@ -1005,7 +1080,7 @@ function App() {
                             </div>
                             <span className={cn(
                               "text-[7px] font-bold tracking-tighter",
-                              session.active ? "text-primary/60" : "text-white/10"
+                              session.active ? "text-primary/60" : theme === 'light' ? "text-slate-900/10" : "text-white/10"
                             )}>
                               {session.timeDisplay}
                             </span>
@@ -1022,18 +1097,18 @@ function App() {
                                 "w-1.5 h-1.5 rounded-full transition-all duration-500",
                                 session.active 
                                   ? "bg-primary shadow-[0_0_10px_rgba(212,175,55,0.6)] animate-pulse" 
-                                  : "bg-white/10"
+                                  : theme === 'light' ? "bg-black/10" : "bg-white/10"
                               )} />
                               <span className={cn(
                                 "text-[11px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
-                                session.active ? "text-primary" : "text-white/40"
+                                session.active ? "text-primary" : theme === 'light' ? "text-slate-900/40" : "text-white/40"
                               )}>
                                 {session.name}
                               </span>
                             </div>
                             <span className={cn(
                               "text-[8px] font-bold tracking-[0.1em] transition-colors duration-300",
-                              session.active ? "text-primary/40" : "text-white/10"
+                              session.active ? "text-primary/40" : theme === 'light' ? "text-slate-900/10" : "text-white/10"
                             )}>
                               {session.timeDisplay}
                             </span>
@@ -1042,29 +1117,45 @@ function App() {
                       </div>
                     </div>
 
-                      <div className="flex items-baseline gap-2 sm:gap-4 relative py-2">
+                    <div className="flex flex-col items-center gap-1 sm:gap-4 relative py-2">
+                      <div className="flex items-center gap-2">
                         <div className="relative group/dollar">
                           <span className="text-xl xs:text-2xl sm:text-5xl font-extralight bg-gradient-to-b from-primary via-primary/80 to-primary/40 bg-clip-text text-transparent select-none">
                             $
                           </span>
                         </div>
-                        <h2 className="text-3xl xs:text-5xl sm:text-8xl font-black tracking-tighter text-white flex items-baseline">
+                        <h2 className={cn("text-3xl xs:text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline", theme === 'light' ? "text-slate-900" : "text-white")}>
                           {Math.floor(currentCapital).toLocaleString()}
-                          <span className="text-lg xs:text-xl sm:text-4xl text-primary flex items-baseline">
+                          <span className="text-lg xs:text-xl sm:text-4xl text-primary flex items-baseline relative group/balance-dec">
                               <span className="mx-0.5">.</span>
                               <span className="ml-0.5 tracking-tight">
                                 {((currentCapital % 1) * 100).toFixed(0).padStart(2, '0')}
                               </span>
+                              {/* Modern Styled Withdrawal Icon - Static Design */}
+                                <button 
+                                   onClick={(e) => { 
+                                     e.stopPropagation();
+                                     setIsAddingWithdrawal(true); 
+                                     haptic('medium'); 
+                                   }}
+                                   className="absolute -top-5 sm:-top-8 left-[60%] -translate-x-1/2 active:scale-90 transition-transform"
+                                 >
+                                <div className="relative flex items-center justify-center p-1.5 sm:p-2 rounded-full bg-red-500/10 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                                  <LogOut className="w-2.5 sm:w-4 h-2.5 sm:h-4 text-red-500 rotate-90" />
+                                </div>
+                              </button>
                             </span>
                         </h2>
                       </div>
+                      
+                    </div>
                     </div>
                     
                     {/* Genius Stats Row - Better mobile spacing */}
                     <div className="mt-4 sm:mt-10 grid grid-cols-3 gap-2 sm:gap-8 w-full max-w-xl px-2 sm:px-4">
                       {/* Health Score */}
                       <div className="flex flex-col items-center space-y-1.5 sm:space-y-3 group/stat transition-all duration-300 hover:scale-105 sm:hover:scale-110">
-                        <p className="text-[6px] sm:text-[9px] font-black text-white/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Health Score</p>
+                        <p className={cn("text-[6px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Health Score</p>
                         <div className={cn(
                           "flex items-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-black tracking-tight transition-all",
                           geniusMetrics.healthScore > 60 
@@ -1078,10 +1169,10 @@ function App() {
                       
                       {/* 30D Projection */}
                       <div className="flex flex-col items-center space-y-1.5 sm:space-y-3 group/stat transition-all duration-300 hover:scale-105 sm:hover:scale-110">
-                        <p className="text-[6px] sm:text-[9px] font-black text-white/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Projected 30D</p>
+                        <p className={cn("text-[6px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Projected 30D</p>
                         <div className="flex flex-col items-center">
-                          <p className="text-xs sm:text-xl font-black tracking-tighter text-white/90">
-                            <span className="text-[9px] sm:text-xs font-light text-white/30 mr-0.5">$</span>
+                          <p className={cn("text-xs sm:text-xl font-black tracking-tighter", theme === 'light' ? "text-slate-900/90" : "text-white/90")}>
+                            <span className={cn("text-[9px] sm:text-xs font-light mr-0.5", theme === 'light' ? "text-slate-900/30" : "text-white/30")}>$</span>
                             {Math.round(geniusMetrics.projected30D).toLocaleString()}
                           </p>
                           <div className="flex items-center gap-0.5 text-[6px] sm:text-[8px] font-black text-primary uppercase tracking-widest opacity-60">
@@ -1093,7 +1184,7 @@ function App() {
                       
                       {/* Growth */}
                       <div className="flex flex-col items-center space-y-1.5 sm:space-y-3 group/stat transition-all duration-300 hover:scale-105 sm:hover:scale-110">
-                        <p className="text-[6px] sm:text-[9px] font-black text-white/20 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Performance</p>
+                        <p className={cn("text-[6px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Performance</p>
                         <div className={cn(
                           "flex items-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-xs font-black tracking-tight transition-all",
                           stats.totalProfit >= 0 
@@ -1116,43 +1207,46 @@ function App() {
 
             {/* Smart Insights Section */}
             {insights.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-0">
                 {insights.map((insight, index) => (
                   <div 
                     key={index}
                     className={cn(
-                      "group relative p-5 rounded-[2rem] border overflow-hidden transition-all duration-500 hover:scale-[1.02]",
-                      insight.type === 'success' ? "bg-green-500/[0.03] border-green-500/10 hover:bg-green-500/[0.05]" :
-                      insight.type === 'warning' ? "bg-red-500/[0.03] border-red-500/10 hover:bg-red-500/[0.05]" :
-                      "bg-blue-500/[0.03] border-blue-500/10 hover:bg-blue-500/[0.05]"
+                      "group relative p-5 rounded-[2rem] border overflow-hidden transition-all duration-500 hover:scale-[1.02] backdrop-blur-xl",
+                      insight.type === 'success' ? (theme === 'light' ? "bg-green-500/15 border-green-500/30 shadow-sm" : "bg-green-500/[0.03] border-green-500/10 hover:bg-green-500/[0.05]") :
+                      insight.type === 'warning' ? (theme === 'light' ? "bg-red-500/15 border-red-500/30 shadow-sm" : "bg-red-500/[0.03] border-red-500/10 hover:bg-red-500/[0.05]") :
+                      (theme === 'light' ? "bg-blue-500/15 border-blue-500/30 shadow-sm" : "bg-blue-500/[0.03] border-blue-500/10 hover:bg-blue-500/[0.05]")
                     )}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className={cn(
                         "p-3 rounded-2xl",
-                        insight.type === 'success' ? "bg-green-500/10 text-green-500" :
-                        insight.type === 'warning' ? "bg-red-500/10 text-red-500" :
-                        "bg-blue-500/10 text-blue-500"
+                        insight.type === 'success' ? (theme === 'light' ? "bg-green-500/20 text-green-600" : "bg-green-500/10 text-green-500") :
+                        insight.type === 'warning' ? (theme === 'light' ? "bg-red-500/20 text-red-600" : "bg-red-500/10 text-red-500") :
+                        (theme === 'light' ? "bg-blue-500/20 text-blue-600" : "bg-blue-500/10 text-blue-500")
                       )}>
                         {insight.icon === 'TrendingUp' && <TrendingUp className="w-5 h-5" />}
                         {insight.icon === 'AlertTriangle' && <AlertTriangle className="w-5 h-5" />}
                         {insight.icon === 'Clock' && <Clock className="w-5 h-5" />}
                         {insight.icon === 'Target' && <Target className="w-5 h-5" />}
                       </div>
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.03] border border-white/[0.05] rounded-full">
-                        <Sparkles className="w-2.5 h-2.5 text-white/40" />
-                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Insight</span>
+                      <div className={cn(
+                        "flex items-center gap-1.5 px-3 py-1 rounded-full border",
+                        theme === 'light' ? "bg-white/40 border-black/10 shadow-sm" : "bg-white/[0.03] border-white/[0.05]"
+                      )}>
+                        <Sparkles className={cn("w-2.5 h-2.5", theme === 'light' ? "text-slate-900/60" : "text-white/40")} />
+                        <span className={cn("text-[9px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-900/40" : "text-white/20")}>Insight</span>
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <h4 className="text-[11px] font-black text-white/80 uppercase tracking-widest">{insight.title}</h4>
-                      <p className="text-[13px] font-medium text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">
+                      <h4 className={cn("text-[11px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-900/90" : "text-white/80")}>{insight.title}</h4>
+                      <p className={cn("text-[13px] font-semibold leading-relaxed transition-colors", theme === 'light' ? "text-slate-900/70 group-hover:text-slate-900/90" : "text-white/40 group-hover:text-white/60")}>
                         {insight.message}
                       </p>
                     </div>
 
-                    <div className="absolute -bottom-4 -right-4 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
+                    <div className={cn("absolute -bottom-4 -right-4 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity", theme === 'light' ? "text-slate-900" : "text-white")}>
                       {insight.icon === 'TrendingUp' && <TrendingUp className="w-24 h-24" />}
                       {insight.icon === 'AlertTriangle' && <AlertTriangle className="w-24 h-24" />}
                       {insight.icon === 'Clock' && <Clock className="w-24 h-24" />}
@@ -1165,20 +1259,20 @@ function App() {
 
             {/* Profit Targets Progress */}
             {showTargetsOnHome && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-0">
                 {/* Weekly Target */}
-                <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-6 space-y-4">
+                <div className="ios-card p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Trophy className="w-3 h-3 text-amber-500/60" />
-                      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Weekly Target</h3>
+                      <h3 className={cn("text-[10px] font-black uppercase tracking-[0.3em]", theme === 'light' ? "text-slate-900/40" : "text-white/40")}>Weekly Target</h3>
                     </div>
-                    <span className="text-[10px] font-black text-white/20 tracking-widest">
+                    <span className={cn("text-[10px] font-black tracking-widest", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>
                       ${Math.round(targetProgress.weekly.profit)} / ${targetProgress.weekly.target}
                     </span>
                   </div>
                   
-                  <div className="relative h-2 w-full bg-white/[0.02] rounded-full overflow-hidden">
+                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.02]")}>
                     <div 
                       className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500/40 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all duration-1000 ease-out"
                       style={{ width: `${targetProgress.weekly.percentage}%` }}
@@ -1186,24 +1280,24 @@ function App() {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">Progress</span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-900/10" : "text-white/10")}>Progress</span>
                     <span className="text-[11px] font-black text-amber-500/80 tracking-tighter">{Math.round(targetProgress.weekly.percentage)}%</span>
                   </div>
                 </div>
 
                 {/* Monthly Target */}
-                <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] rounded-[2rem] p-6 space-y-4">
+                <div className="ios-card p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Monthly Target</h3>
+                      <h3 className={cn("text-[10px] font-black uppercase tracking-[0.3em]", theme === 'light' ? "text-slate-900/40" : "text-white/40")}>Monthly Target</h3>
                     </div>
-                    <span className="text-[10px] font-black text-white/20 tracking-widest">
+                    <span className={cn("text-[10px] font-black tracking-widest", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>
                       ${Math.round(targetProgress.monthly.profit)} / ${targetProgress.monthly.target}
                     </span>
                   </div>
                   
-                  <div className="relative h-2 w-full bg-white/[0.02] rounded-full overflow-hidden">
+                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.02]")}>
                     <div 
                       className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/40 to-primary shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-1000 ease-out"
                       style={{ width: `${targetProgress.monthly.percentage}%` }}
@@ -1211,18 +1305,21 @@ function App() {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">Progress</span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-900/10" : "text-white/10")}>Progress</span>
                     <span className="text-[11px] font-black text-primary/80 tracking-tighter">{Math.round(targetProgress.monthly.percentage)}%</span>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-4 px-4 sm:px-0">
               <div className="flex flex-col items-center justify-center mb-4">
-                <div className="inline-flex items-center gap-2.5 px-6 py-2 bg-white/[0.02] backdrop-blur-md border border-white/[0.05] rounded-full shadow-2xl">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.1)]" />
-                  <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white/20">Operation Stream</p>
+                <div className={cn(
+                  "inline-flex items-center gap-2.5 px-6 py-2 border rounded-full shadow-2xl",
+                  theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+                )}>
+                  <div className={cn("w-1.5 h-1.5 rounded-full", theme === 'light' ? "bg-black/20" : "bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.1)]")} />
+                  <p className={cn("text-[11px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Operation Stream</p>
                 </div>
               </div>
               
@@ -1230,40 +1327,74 @@ function App() {
                 {recordsWithBalance.slice(0, 5).map((record) => (
                   <div 
                     key={record.id} 
-                    className="flex items-center gap-5 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.04] border border-white/[0.05] rounded-[1.8rem] p-5 transition-all group shadow-xl"
+                    className={cn(
+                      "flex items-center gap-5 border rounded-[1.8rem] p-5 transition-all group shadow-xl",
+                      theme === 'light' ? "bg-white/40 border-white/50 hover:bg-white/60" : "bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.04] border border-white/[0.05]"
+                    )}
                   >
                     <div className={cn(
                       "w-1.5 h-10 rounded-full",
+                      record.type === 'withdrawal' ? "bg-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]" :
                       record.profitLoss >= 0 ? "bg-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "bg-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
                     )} />
                     <div className="flex-1 flex items-center justify-between">
                       <div className="text-left">
-                        <p className="text-[11px] font-black text-white/80 uppercase tracking-tight mb-0.5">
-                          {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </p>
-                        <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.1em] truncate max-w-[150px]">
-                          {record.notes || 'No meta data'}
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className={cn("text-[11px] font-black uppercase tracking-tight", theme === 'light' ? "text-slate-900/80" : "text-white/80")}>
+                            {new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </p>
+                          {record.type === 'withdrawal' && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[7px] font-black uppercase tracking-widest border border-amber-500/20">
+                              Withdrawal
+                            </span>
+                          )}
+                        </div>
+                        <p className={cn("text-[9px] font-bold uppercase tracking-[0.1em] truncate max-w-[150px]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>
+                          {record.notes || (record.type === 'withdrawal' ? 'Profit Withdrawal' : 'No meta data')}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <div className={cn("text-xl font-black tracking-tighter", record.profitLoss >= 0 ? "text-green-500/60" : "text-red-500/60")}>
-                          {record.profitLoss >= 0 ? '+' : ''}{record.profitLoss.toLocaleString()}
+                      <div className="text-right flex items-center gap-3">
+                        <div>
+                          <div className={cn(
+                            "text-xl font-black tracking-tighter", 
+                            record.type === 'withdrawal' ? "text-amber-500/60" :
+                            record.profitLoss >= 0 ? "text-green-500/60" : "text-red-500/60"
+                          )}>
+                            {record.type === 'withdrawal' ? '-' : (record.profitLoss >= 0 ? '+' : '')}{Math.abs(record.profitLoss).toLocaleString()}
+                          </div>
+                          <p className={cn("text-[10px] font-black uppercase tracking-tighter", theme === 'light' ? "text-slate-900/10" : "text-white/10")}>
+                            BAL // {record.capitalAfter.toLocaleString()}
+                          </p>
                         </div>
-                        <p className="text-[10px] font-black text-white/10 uppercase tracking-tighter">
-                          BAL // {record.capitalAfter.toLocaleString()}
-                        </p>
+                        {record.type === 'withdrawal' && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteRecord(record.id);
+                            }}
+                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500/40 hover:text-red-500 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
                 {records.length === 0 && (
-                  <div className="py-20 flex flex-col items-center justify-center bg-white/[0.02] backdrop-blur-md border border-white/[0.05] rounded-[2rem] shadow-2xl">
-                    <div className="w-16 h-16 bg-white/[0.02] rounded-full flex items-center justify-center mb-6 border border-white/[0.05]">
-                      <div className="w-6 h-6 text-white/10 flex items-center justify-center">
-                        <div className="w-4 h-4 border-2 border-white/20 rounded-full" />
+                  <div className={cn(
+                    "py-20 flex flex-col items-center justify-center border rounded-[2rem] shadow-2xl",
+                    theme === 'light' ? "bg-white/40 border-white/50" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+                  )}>
+                    <div className={cn(
+                      "w-16 h-16 rounded-full flex items-center justify-center mb-6 border",
+                      theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]"
+                    )}>
+                      <div className={cn("w-6 h-6 flex items-center justify-center", theme === 'light' ? "text-slate-900/10" : "text-white/10")}>
+                        <div className={cn("w-4 h-4 border-2 rounded-full", theme === 'light' ? "border-black/20" : "border-white/20")} />
                       </div>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">No active stream</p>
+                    <p className={cn("text-[10px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>No active stream</p>
                   </div>
                 )}
               </div>
@@ -1279,11 +1410,12 @@ function App() {
               records={records} 
               initialCapital={initialCapital} 
               sessionStats={sessionStats}
+              theme={theme}
             />
           </div>
         );
       case 'reports': {
-        // Group trades by date
+        // Group trades and withdrawals by date
         const filteredTrades = reportTrades.filter(trade => {
           const date = trade.closeTime.split(' ')[0].replace(/\./g, '-');
           const matchesDate = !reportDateFilter || date === reportDateFilter;
@@ -1299,7 +1431,17 @@ function App() {
           return matchesDate && matchesSearch && matchesStatus;
         });
 
-        // Calculate counts based on current date and search filters
+        const filteredWithdrawals = records.filter(r => {
+          if (r.type !== 'withdrawal') return false;
+          const date = r.date.split('T')[0];
+          const matchesDate = !reportDateFilter || date === reportDateFilter;
+          const matchesSearch = !reportSearchQuery || (r.notes || '').toLowerCase().includes(reportSearchQuery.toLowerCase());
+          // Withdrawals are always "loss" in terms of balance reduction, but let's show them in 'all' and maybe 'loss' if filtered
+          const matchesStatus = reportStatusFilter === 'all' || reportStatusFilter === 'loss';
+          return matchesDate && matchesSearch && matchesStatus;
+        });
+
+        // Calculate counts
         const filteredForCounts = reportTrades.filter(trade => {
           const date = trade.closeTime.split(' ')[0].replace(/\./g, '-');
           const matchesDate = !reportDateFilter || date === reportDateFilter;
@@ -1315,23 +1457,32 @@ function App() {
           losses: filteredForCounts.filter(t => (t.profit + t.commission + t.swap) <= 0).length
         };
 
-        // Sort trades by closeTime before grouping
-        const sortedTrades = [...filteredTrades].sort((a, b) => {
-          const timeA = new Date(a.closeTime.replace(/\./g, '-')).getTime();
-          const timeB = new Date(b.closeTime.replace(/\./g, '-')).getTime();
+        // Create combined items list
+        type CombinedItem = { type: 'trade', data: MT5Trade } | { type: 'withdrawal', data: DailyRecord };
+        const combinedItems: CombinedItem[] = [
+          ...filteredTrades.map(t => ({ type: 'trade' as const, data: t })),
+          ...filteredWithdrawals.map(w => ({ type: 'withdrawal' as const, data: w }))
+        ];
+
+        // Sort combined items
+        combinedItems.sort((a, b) => {
+          const timeA = a.type === 'trade' ? new Date(a.data.closeTime.replace(/\./g, '-')).getTime() : new Date(a.data.date).getTime();
+          const timeB = b.type === 'trade' ? new Date(b.data.closeTime.replace(/\./g, '-')).getTime() : new Date(b.data.date).getTime();
           return reportSortOrder === 'desc' ? timeB - timeA : timeA - timeB;
         });
 
-        const tradesByDate = sortedTrades.reduce((acc: Record<string, { trades: MT5Trade[], dailyPL: number }>, trade) => {
-          const date = trade.closeTime.split(' ')[0].replace(/\./g, '-');
-          if (!acc[date]) acc[date] = { trades: [], dailyPL: 0 };
-          acc[date].trades.push(trade);
-          acc[date].dailyPL += (trade.profit + trade.commission + trade.swap);
+        const itemsByDate = combinedItems.reduce((acc: Record<string, { items: CombinedItem[], dailyPL: number }>, item) => {
+          const date = item.type === 'trade' ? item.data.closeTime.split(' ')[0].replace(/\./g, '-') : item.data.date.split('T')[0];
+          if (!acc[date]) acc[date] = { items: [], dailyPL: 0 };
+          acc[date].items.push(item);
+          if (item.type === 'trade') {
+            acc[date].dailyPL += (item.data.profit + item.data.commission + item.data.swap);
+          }
           return acc;
         }, {});
 
         // Sort dates
-        const sortedDates = Object.keys(tradesByDate).sort((a, b) => {
+        const sortedDates = Object.keys(itemsByDate).sort((a, b) => {
           const timeA = new Date(a).getTime();
           const timeB = new Date(b).getTime();
           return reportSortOrder === 'desc' ? timeB - timeA : timeA - timeB;
@@ -1340,31 +1491,40 @@ function App() {
         return (
           <div className="space-y-10 animate-fade-in pb-32">
             <div className="flex flex-col items-center justify-center mb-6">
-              <div className="inline-flex items-center gap-2.5 px-6 py-2 bg-white/[0.02] backdrop-blur-md border border-white/[0.05] rounded-full shadow-2xl">
+              <div className={cn(
+                "inline-flex items-center gap-2.5 px-6 py-2 border rounded-full shadow-2xl",
+                theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+              )}>
                 <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_12px_rgba(59,130,245,0.6)] animate-pulse" />
-                <p className="text-[11px] font-black uppercase tracking-[0.5em] text-white/30">Trade Report</p>
+                <p className={cn("text-[11px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/30" : "text-white/30")}>Trade Report</p>
               </div>
             </div>
 
-            {reportTrades.length > 0 && (
+            {(reportTrades.length > 0 || records.some(r => r.type === 'withdrawal')) && (
               <div className="px-4">
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-[2rem] p-2 sm:p-3 backdrop-blur-md">
+                <div className={cn(
+                  "border rounded-[2rem] p-2 sm:p-3 backdrop-blur-md",
+                  theme === 'light' ? "bg-white/40 border-white/50" : "bg-white/[0.02] border-white/[0.05]"
+                )}>
                   <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
                     {/* Status Filters - Segmented Style */}
-                    <div className="flex-1 flex bg-black/20 rounded-2xl p-1 gap-1">
+                    <div className={cn(
+                      "flex-1 flex rounded-2xl p-1 gap-1",
+                      theme === 'light' ? "bg-black/5" : "bg-black/20"
+                    )}>
                       <button 
                         onClick={() => { setReportStatusFilter('all'); haptic('light'); }}
                         className={cn(
                           "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all duration-500",
                           reportStatusFilter === 'all' 
                             ? "bg-primary text-black shadow-lg shadow-primary/20 font-black" 
-                            : "text-white/30 hover:text-white/50 font-bold"
+                            : (theme === 'light' ? "text-slate-900/30 hover:text-slate-900/50" : "text-white/30 hover:text-white/50") + " font-bold"
                         )}
                       >
                         <span className="text-[10px] uppercase tracking-widest">All</span>
                         <span className={cn(
                           "text-[9px] px-1.5 py-0.5 rounded-md",
-                          reportStatusFilter === 'all' ? "bg-black/10" : "bg-white/5"
+                          reportStatusFilter === 'all' ? "bg-black/10" : (theme === 'light' ? "bg-black/5" : "bg-white/5")
                         )}>{counts.total}</span>
                       </button>
                       
@@ -1374,13 +1534,13 @@ function App() {
                           "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all duration-500",
                           reportStatusFilter === 'win' 
                             ? "bg-green-500 text-white shadow-lg shadow-green-500/20 font-black" 
-                            : "text-white/30 hover:text-white/50 font-bold"
+                            : (theme === 'light' ? "text-slate-900/30 hover:text-slate-900/50" : "text-white/30 hover:text-white/50") + " font-bold"
                         )}
                       >
                         <span className="text-[10px] uppercase tracking-widest">Wins</span>
                         <span className={cn(
                           "text-[9px] px-1.5 py-0.5 rounded-md",
-                          reportStatusFilter === 'win' ? "bg-black/10" : "bg-white/5"
+                          reportStatusFilter === 'win' ? "bg-black/10" : (theme === 'light' ? "bg-black/5" : "bg-white/5")
                         )}>{counts.wins}</span>
                       </button>
 
@@ -1390,18 +1550,18 @@ function App() {
                           "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl transition-all duration-500",
                           reportStatusFilter === 'loss' 
                             ? "bg-red-500 text-white shadow-lg shadow-red-500/20 font-black" 
-                            : "text-white/30 hover:text-white/50 font-bold"
+                            : (theme === 'light' ? "text-slate-900/30 hover:text-slate-900/50" : "text-white/30 hover:text-white/50") + " font-bold"
                         )}
                       >
                         <span className="text-[10px] uppercase tracking-widest">Losses</span>
                         <span className={cn(
                           "text-[9px] px-1.5 py-0.5 rounded-md",
-                          reportStatusFilter === 'loss' ? "bg-black/10" : "bg-white/5"
+                          reportStatusFilter === 'loss' ? "bg-black/10" : (theme === 'light' ? "bg-black/5" : "bg-white/5")
                         )}>{counts.losses}</span>
                       </button>
                     </div>
 
-                    <div className="hidden lg:block w-px h-8 bg-white/[0.05]" />
+                    <div className={cn("hidden lg:block w-px h-8", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.05]")} />
 
                     {/* Secondary Controls */}
                     <div className="flex items-center gap-2">
@@ -1411,7 +1571,10 @@ function App() {
                           setReportSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
                           haptic('light');
                         }}
-                        className="flex-1 lg:flex-none flex items-center gap-3 px-5 py-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl hover:bg-white/[0.05] transition-all group"
+                        className={cn(
+                          "flex-1 lg:flex-none flex items-center gap-3 px-5 py-3 border rounded-2xl transition-all group",
+                          theme === 'light' ? "bg-black/[0.02] border-black/[0.05] hover:bg-black/[0.05]" : "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05]"
+                        )}
                       >
                         <div className="w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
                           {reportSortOrder === 'desc' ? (
@@ -1426,7 +1589,10 @@ function App() {
                       </button>
 
                       {/* Date Filter */}
-                      <div className="flex-1 lg:flex-none relative group flex items-center gap-3 px-5 py-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl hover:bg-white/[0.05] transition-all">
+                      <div className={cn(
+                        "flex-1 lg:flex-none relative group flex items-center gap-3 px-5 py-3 rounded-2xl transition-all",
+                        theme === 'light' ? "bg-white/40 border border-white/50 hover:bg-white/60" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                      )}>
                         <div className="w-5 h-5 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
                           <Clock className="w-3 h-3 text-amber-500" />
                         </div>
@@ -1437,7 +1603,10 @@ function App() {
                             setReportDateFilter(e.target.value);
                             haptic('light');
                           }}
-                          className="bg-transparent text-[10px] font-black text-white/60 uppercase tracking-widest outline-none cursor-pointer [color-scheme:dark] w-full lg:w-auto"
+                          className={cn(
+                            "bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer w-full lg:w-auto",
+                            theme === 'light' ? "text-slate-600 [color-scheme:light]" : "text-white/60 [color-scheme:dark]"
+                          )}
                         />
                         {reportDateFilter && (
                           <button 
@@ -1457,82 +1626,124 @@ function App() {
               </div>
             )}
 
-            {reportTrades.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-white/[0.01] border border-white/[0.03] rounded-[2.5rem] border-dashed">
-                <FileSpreadsheet className="w-16 h-16 text-white/5 mb-4" />
-                <p className="text-white/20 font-black uppercase tracking-widest text-[10px]">No trades imported yet</p>
-                <p className="text-white/10 text-xs mt-2">Tap the central logo to import an MT5 report</p>
-              </div>
-            ) : filteredTrades.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-white/[0.01] border border-white/[0.03] rounded-[2.5rem]">
-                <AlertTriangle className="w-12 h-12 text-white/5 mb-4" />
-                <p className="text-white/20 font-black uppercase tracking-widest text-[10px]">No matching trades found</p>
-                <button 
-                  onClick={() => { setReportDateFilter(''); setReportSearchQuery(''); haptic('medium'); }}
-                  className="mt-4 text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
-                >
-                  Clear all filters
-                </button>
+            {combinedItems.length === 0 ? (
+              <div className={cn(
+                "flex flex-col items-center justify-center py-20 rounded-[2.5rem] border-dashed",
+                theme === 'light' ? "bg-white/30 border-white/50" : "bg-white/[0.01] border-white/[0.03]"
+              )}>
+                <FileSpreadsheet className={cn("w-16 h-16 mb-4", theme === 'light' ? "text-slate-300" : "text-white/5")} />
+                <p className={cn("font-black uppercase tracking-widest text-[10px]", theme === 'light' ? "text-slate-400" : "text-white/20")}>No activity found</p>
+                <p className={cn("text-xs mt-2", theme === 'light' ? "text-slate-400" : "text-white/10")}>Trades and withdrawals will appear here</p>
               </div>
             ) : (
               <div className="space-y-12">
                 {sortedDates.map(date => (
                   <div key={date} className="space-y-6">
                     <div className="flex items-center gap-4 px-2">
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className={cn("h-px flex-1", theme === 'light' ? "bg-slate-200" : "bg-white/[0.05]")} />
                       <div className="flex flex-col items-center gap-1">
-                        <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] whitespace-nowrap">
+                        <h3 className={cn("text-[10px] font-black uppercase tracking-[0.3em] whitespace-nowrap", theme === 'light' ? "text-slate-400" : "text-white/30")}>
                           {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                         </h3>
-                        <div className={cn(
-                          "px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase",
-                          tradesByDate[date].dailyPL >= 0 ? "bg-green-500/10 text-green-500/60" : "bg-red-500/10 text-red-500/60"
-                        )}>
-                          {tradesByDate[date].dailyPL >= 0 ? '+' : ''}${tradesByDate[date].dailyPL.toLocaleString()}
-                        </div>
+                        {itemsByDate[date].dailyPL !== 0 && (
+                          <div className={cn(
+                            "px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase",
+                            itemsByDate[date].dailyPL >= 0 ? "bg-green-500/10 text-green-500/60" : "bg-red-500/10 text-red-500/60"
+                          )}>
+                            {itemsByDate[date].dailyPL >= 0 ? '+' : ''}${itemsByDate[date].dailyPL.toLocaleString()}
+                          </div>
+                        )}
                       </div>
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className={cn("h-px flex-1", theme === 'light' ? "bg-slate-200" : "bg-white/[0.05]")} />
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                      {tradesByDate[date].trades.map((trade, i) => (
-                        <div key={i} className="group relative bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 hover:bg-white/[0.04] transition-all duration-300">
-                          <div className="flex justify-between items-start mb-2 sm:mb-3">
-                            <div className={cn(
-                              "w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-xs font-black",
-                              trade.profit >= 0 ? "bg-green-500/10 text-green-500/60" : "bg-red-500/10 text-red-500/60"
-                            )}>
-                              {trade.symbol.substring(0, 2).toUpperCase()}
-                            </div>
-                            <div className="text-right">
-                              <p className={cn("text-base sm:text-xl font-black tracking-tighter leading-none", trade.profit >= 0 ? "text-green-500/80" : "text-red-500/80")}>
-                                {trade.profit >= 0 ? '+' : ''}{trade.profit.toLocaleString()}
-                              </p>
-                              <p className="text-[7px] sm:text-[8px] font-black text-white/10 uppercase tracking-widest mt-1">Profit</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1 sm:space-y-1.5 text-left">
-                            <h4 className="text-[11px] sm:text-[13px] font-black text-white/90 truncate">{trade.symbol}</h4>
-                            <div className="flex items-center justify-between">
-                              <span className={cn(
-                                "text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 sm:px-2 py-0.5 rounded-md",
-                                trade.type === 'Buy' ? "bg-blue-500/20 text-blue-400" : "bg-orange-500/20 text-orange-400"
+                      {itemsByDate[date].items.map((item, i) => (
+                        item.type === 'trade' ? (
+                          <div key={i} className={cn(
+                            "group relative rounded-2xl p-4 transition-all duration-300 backdrop-blur-xl",
+                            theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04]"
+                          )}>
+                            <div className="flex justify-between items-start mb-2 sm:mb-3">
+                              <div className={cn(
+                                "w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-xs font-black",
+                                item.data.profit >= 0 ? "bg-green-500/10 text-green-500/60" : "bg-red-500/10 text-red-500/60"
                               )}>
-                                {trade.type}
-                              </span>
-                              <span className="text-[9px] sm:text-[11px] font-black text-white/40 tracking-tighter">{trade.volume}L</span>
+                                {item.data.symbol.substring(0, 2).toUpperCase()}
+                              </div>
+                              <div className="text-right">
+                                <p className={cn("text-base sm:text-xl font-black tracking-tighter leading-none", item.data.profit >= 0 ? "text-green-500/80" : "text-red-500/80")}>
+                                  {item.data.profit >= 0 ? '+' : ''}{item.data.profit.toLocaleString()}
+                                </p>
+                                <p className={cn("text-[7px] sm:text-[8px] font-black uppercase tracking-widest mt-1", theme === 'light' ? "text-slate-400" : "text-white/10")}>Profit</p>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-white/[0.03] flex items-center justify-between">
-                            <span className="text-[8px] sm:text-[9px] font-bold text-white/20 tracking-tighter">#{trade.positionId.slice(-6)}</span>
-                            <div className="flex items-center gap-1 sm:gap-1.5 text-white/30">
-                              <Clock className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
-                              <span className="text-[9px] sm:text-[10px] font-bold tracking-tighter">{trade.closeTime.split(' ')[1].substring(0, 5)}</span>
+                            <div className="space-y-1 sm:space-y-1.5 text-left">
+                              <h4 className={cn("text-[11px] sm:text-[13px] font-black truncate", theme === 'light' ? "text-slate-700" : "text-white/90")}>{item.data.symbol}</h4>
+                              <div className="flex items-center justify-between">
+                                <span className={cn(
+                                  "text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 sm:px-2 py-0.5 rounded-md",
+                                  item.data.type === 'Buy' ? "bg-blue-500/20 text-blue-400" : "bg-orange-500/20 text-orange-400"
+                                )}>
+                                  {item.data.type}
+                                </span>
+                                <span className={cn("text-[9px] sm:text-[11px] font-black tracking-tighter", theme === 'light' ? "text-slate-400" : "text-white/40")}>{item.data.volume}L</span>
+                              </div>
+                            </div>
+
+                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-slate-100" : "border-white/[0.03]")}>
+                              <span className={cn("text-[8px] sm:text-[9px] font-bold tracking-tighter", theme === 'light' ? "text-slate-300" : "text-white/20")}>#{item.data.positionId.slice(-6)}</span>
+                              <div className={cn("flex items-center gap-1 sm:gap-1.5", theme === 'light' ? "text-slate-400" : "text-white/30")}>
+                                <Clock className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
+                                <span className="text-[9px] sm:text-[10px] font-bold tracking-tighter">{item.data.closeTime.split(' ')[1].substring(0, 5)}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div key={i} className={cn(
+                            "group relative rounded-2xl p-4 transition-all duration-300 backdrop-blur-xl",
+                            theme === 'light' ? "bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/20" : "bg-white/[0.02] border border-amber-500/20 hover:bg-white/[0.04]"
+                          )}>
+                            <div className="flex justify-between items-start mb-2 sm:mb-3">
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center relative">
+                                <LogOut className="w-4 h-4 text-amber-500 rotate-90" />
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteRecord(item.data.id);
+                                  }}
+                                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all active:scale-90"
+                                >
+                                  <X className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-base sm:text-xl font-black tracking-tighter leading-none text-amber-500/80">
+                                  -{Math.abs(item.data.profitLoss).toLocaleString()}
+                                </p>
+                                <p className={cn("text-[7px] sm:text-[8px] font-black uppercase tracking-widest mt-1", theme === 'light' ? "text-slate-400" : "text-white/10")}>Withdrawal</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1 sm:space-y-1.5 text-left">
+                              <h4 className={cn("text-[11px] sm:text-[13px] font-black truncate", theme === 'light' ? "text-slate-700" : "text-white/90")}>Profit Withdrawal</h4>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest px-1.5 sm:px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-500">
+                                  Cash Out
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-amber-500/10" : "border-white/[0.03]")}>
+                              <span className={cn("text-[8px] sm:text-[9px] font-bold tracking-tighter truncate max-w-[60%]", theme === 'light' ? "text-slate-300" : "text-white/20")}>{item.data.notes || 'No notes'}</span>
+                              <div className={cn("flex items-center gap-1 sm:gap-1.5", theme === 'light' ? "text-slate-400" : "text-white/30")}>
+                                <Clock className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
+                                <span className="text-[9px] sm:text-[10px] font-bold tracking-tighter">{new Date(item.data.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
                       ))}
                     </div>
                   </div>
@@ -1547,7 +1758,10 @@ function App() {
           <div className="space-y-8 animate-fade-in pb-40 px-4">
             {/* Header Section */}
             <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group">
+              <div className={cn(
+                "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group",
+                theme === 'light' ? "bg-white/60 border border-white/50 shadow-lg" : "bg-white/[0.03] border border-white/10"
+              )}>
                 <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Settings className="w-8 h-8 text-primary animate-spin-slow relative z-10" />
               </div>
@@ -1555,19 +1769,25 @@ function App() {
               <div className="flex flex-col items-center space-y-0.5">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <div className="w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_rgba(212,175,55,0.4)] animate-pulse" />
-                  <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Control Center</p>
+                  <p className={cn("text-[8px] font-black uppercase tracking-[0.3em]", theme === 'light' ? "text-slate-400" : "text-white/20")}>Control Center</p>
                 </div>
-                <h2 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">
+                <h2 className={cn("text-2xl font-black tracking-tighter uppercase leading-none", theme === 'light' ? "text-slate-800" : "text-white")}>
                   App <span className="text-primary/70">Settings</span>
                 </h2>
               </div>
             </div>
 
             {/* Profile & Cloud Section */}
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-[2.5rem] p-6 backdrop-blur-md">
+            <div className={cn(
+              "rounded-[2.5rem] p-6 backdrop-blur-md transition-all duration-300",
+              theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm" : "bg-white/[0.02] border border-white/[0.05]"
+            )}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center border overflow-hidden shrink-0",
+                    theme === 'light' ? "bg-white/40 border-white/60" : "bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-white/10"
+                  )}>
                     {user ? (
                       <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" />
                     ) : (
@@ -1577,9 +1797,9 @@ function App() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1 h-1 rounded-full bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.3)]" />
-                      <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Identity</p>
+                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Identity</p>
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider truncate">
+                    <h3 className={cn("text-sm font-black uppercase tracking-wider truncate", theme === 'light' ? "text-slate-800" : "text-white")}>
                       {user ? (
                         <>
                           {user.displayName?.split(' ')[0]} <span className="text-indigo-500/50">{user.displayName?.split(' ').slice(1).join(' ') || 'Profile'}</span>
@@ -1588,7 +1808,7 @@ function App() {
                         <>Cloud <span className="text-indigo-500/50">Identity</span></>
                       )}
                     </h3>
-                    <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest truncate">{user ? user.email : 'Not Synchronized'}</p>
+                    <p className={cn("text-[10px] font-bold uppercase tracking-widest truncate", theme === 'light' ? "text-slate-400" : "text-white/30")}>{user ? user.email : 'Not Synchronized'}</p>
                   </div>
                 </div>
                 <button 
@@ -1605,10 +1825,16 @@ function App() {
               {user && (
                 <button 
                   onClick={() => { handleManualSync(); haptic('medium'); }}
-                  className="w-full py-4 bg-white/[0.03] border border-white/[0.05] rounded-2xl flex items-center justify-center gap-3 group active:scale-[0.98] transition-all"
+                  className={cn(
+                  "w-full py-4 rounded-2xl flex items-center justify-center gap-3 group active:scale-[0.98] transition-all backdrop-blur-xl",
+                  theme === 'light' ? "bg-white/40 border border-white/60 shadow-sm" : "bg-white/[0.03] border border-white/[0.05]"
+                )}
                 >
                   <RefreshCcw className={cn("w-4 h-4 text-emerald-400", isSyncing && "animate-spin")} />
-                  <span className="text-[10px] font-black text-white/60 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-widest group-hover:text-emerald-400 transition-colors",
+                    theme === 'light' ? "text-slate-500" : "text-white/60"
+                  )}>
                     {isSyncing ? 'Synchronizing Data...' : 'Manual Cloud Sync'}
                   </span>
                 </button>
@@ -1620,7 +1846,10 @@ function App() {
               {/* Capital Card */}
               <button 
                 onClick={() => { setIsEditingInitial(true); haptic('medium'); }}
-                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+                className={cn(
+                  "group p-6 rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md transition-all active:scale-95 text-left",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
                   <Wallet className="w-6 h-6 text-emerald-500" />
@@ -1628,16 +1857,19 @@ function App() {
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
                     <div className="w-1 h-1 rounded-full bg-emerald-500/40 shadow-[0_0_5px_rgba(16,185,129,0.3)]" />
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Ledger</p>
+                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ledger</p>
                   </div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Capital <span className="text-emerald-500/50">Base</span></h4>
+                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Capital <span className="text-emerald-500/50">Base</span></h4>
                 </div>
               </button>
 
               {/* Security Card */}
               <button 
                 onClick={() => { setIsChangingPass(true); haptic('medium'); }}
-                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+                className={cn(
+                  "group p-6 rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md transition-all active:scale-95 text-left",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
                 <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
                   <Lock className="w-6 h-6 text-amber-500" />
@@ -1645,16 +1877,19 @@ function App() {
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
                     <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.3)]" />
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Access</p>
+                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Access</p>
                   </div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Security <span className="text-amber-500/50">Hub</span></h4>
+                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Security <span className="text-amber-500/50">Hub</span></h4>
                 </div>
               </button>
 
               {/* Targets Card */}
               <button 
                 onClick={() => { setIsEditingTargets(true); haptic('medium'); }}
-                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+                className={cn(
+                  "group p-6 rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md transition-all active:scale-95 text-left",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
                   <Trophy className="w-6 h-6 text-blue-500" />
@@ -1662,16 +1897,19 @@ function App() {
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
                     <div className="w-1 h-1 rounded-full bg-blue-500/40 shadow-[0_0_5px_rgba(59,130,246,0.3)]" />
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Ambition</p>
+                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ambition</p>
                   </div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest">Profit <span className="text-blue-500/50">Goals</span></h4>
+                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Profit <span className="text-blue-500/50">Goals</span></h4>
                 </div>
               </button>
 
               {/* Notifications Card */}
               <button 
                 onClick={() => { requestNotificationPermission(); haptic('medium'); }}
-                className="group p-6 bg-white/[0.02] border border-white/[0.05] rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md hover:bg-white/[0.05] transition-all active:scale-95 text-left"
+                className={cn(
+                  "group p-6 rounded-[2rem] flex flex-col items-start gap-4 backdrop-blur-md transition-all active:scale-95 text-left",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
                 <div className={cn(
                   "w-12 h-12 rounded-2xl flex items-center justify-center border group-hover:scale-110 transition-transform",
@@ -1689,9 +1927,9 @@ function App() {
                       "w-1 h-1 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.2)]",
                       notificationsEnabled ? "bg-green-500/40" : "bg-primary/40"
                     )} />
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/10">Alerts</p>
+                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Alerts</p>
                   </div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest">System <span className={cn(notificationsEnabled ? "text-green-500/50" : "text-primary/50")}>Status</span></h4>
+                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>System <span className={cn(notificationsEnabled ? "text-green-500/50" : "text-primary/50")}>Status</span></h4>
                 </div>
               </button>
             </div>
@@ -1700,24 +1938,87 @@ function App() {
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => { handleExportJSON(); haptic('medium'); }}
-                className="p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center gap-3 group hover:bg-white/[0.05] transition-all active:scale-95"
+                className={cn(
+                  "p-5 rounded-3xl flex items-center gap-3 group transition-all active:scale-95 backdrop-blur-xl",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
-                <Download className="w-4 h-4 text-white/40 group-hover:text-blue-400 transition-colors" />
-                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Backup</span>
+                <Download className={cn("w-4 h-4 group-hover:text-blue-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
+                <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Backup</span>
               </button>
 
-              <label className="p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center gap-3 group hover:bg-white/[0.05] transition-all active:scale-95 cursor-pointer">
-                <Upload className="w-4 h-4 text-white/40 group-hover:text-purple-400 transition-colors" />
-                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">Restore</span>
+              <label className={cn(
+                "p-5 rounded-3xl flex items-center gap-3 group transition-all active:scale-95 cursor-pointer backdrop-blur-xl",
+                theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+              )}>
+                <Upload className={cn("w-4 h-4 group-hover:text-purple-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
+                <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Restore</span>
                 <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
               </label>
+            </div>
+
+            {/* Theme Toggle Section */}
+            <div className="space-y-3">
+              <button 
+                onClick={toggleTheme}
+                className={cn(
+                  "w-full p-5 border rounded-3xl flex items-center justify-between group transition-all active:scale-[0.99] backdrop-blur-xl",
+                  theme === 'dark' ? "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04]" : "bg-white/60 border-white/60 shadow-sm hover:bg-white/80"
+                )}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center border transition-colors",
+                    theme === 'dark' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-indigo-500/10 border-indigo-500/20'
+                  )}>
+                    {theme === 'dark' ? (
+                      <Sun className="w-5 h-5 text-yellow-500" />
+                    ) : (
+                      <Moon className="w-5 h-5 text-indigo-500" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <div className={cn(
+                        "w-1 h-1 rounded-full transition-colors",
+                        theme === 'dark' ? 'bg-yellow-500/40 shadow-[0_0_5px_rgba(234,179,8,0.2)]' : 'bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.2)]'
+                      )} />
+                      <p className={cn(
+                        "text-[7px] font-black uppercase tracking-[0.2em]",
+                        theme === 'dark' ? "text-white/10" : "text-black/10"
+                      )}>Visual Style</p>
+                    </div>
+                    <span className={cn(
+                      "text-xs font-black uppercase tracking-widest",
+                      theme === 'dark' ? "text-white/70" : "text-black/70"
+                    )}>
+                      {theme === 'dark' ? 'Switch to ' : 'Switch to '}
+                      <span className={theme === 'dark' ? 'text-yellow-500/50' : 'text-indigo-500/50'}>
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div className={cn(
+                  "w-12 h-6 rounded-full border p-1 transition-colors",
+                  theme === 'dark' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-indigo-500/10 border-indigo-500/20'
+                )}>
+                  <div className={cn(
+                    "w-4 h-4 rounded-full transition-all duration-500 transform",
+                    theme === 'dark' ? 'translate-x-6 bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]' : 'translate-x-0 bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+                  )} />
+                </div>
+              </button>
             </div>
 
             {/* Danger Zone Section */}
             <div className="space-y-3">
               <button 
                 onClick={() => { setShowAbout(true); haptic('medium'); }}
-                className="w-full p-5 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center justify-between group hover:bg-white/[0.05] transition-all active:scale-[0.99]"
+                className={cn(
+                  "w-full p-5 rounded-3xl flex items-center justify-between group transition-all active:scale-[0.99] backdrop-blur-xl",
+                  theme === 'light' ? "bg-white/60 border border-white/60 shadow-sm hover:bg-white/80" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
+                )}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
@@ -1726,9 +2027,9 @@ function App() {
                   <div>
                     <div className="flex items-center gap-1 mb-0.5">
                       <div className="w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_5px_rgba(212,175,55,0.2)]" />
-                      <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/10">Information</p>
+                      <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Information</p>
                     </div>
-                    <span className="text-xs font-black text-white/70 uppercase tracking-widest">About <span className="text-primary/50">Fox Trade</span></span>
+                    <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white/70")}>About <span className="text-primary/50">Fox Trade</span></span>
                   </div>
                 </div>
                 <Sparkles className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
@@ -1743,7 +2044,10 @@ function App() {
                     message: 'Are you absolutely sure? This will permanently delete ALL trade records and reset capital settings.'
                   });
                 }}
-                className="w-full p-5 bg-red-500/5 border border-red-500/10 rounded-3xl flex items-center justify-between group hover:bg-red-500/10 transition-all active:scale-[0.99]"
+                className={cn(
+                  "w-full p-5 rounded-3xl flex items-center justify-between group transition-all active:scale-[0.99] backdrop-blur-xl",
+                  theme === 'light' ? "bg-red-500/15 border border-red-500/30 shadow-sm hover:bg-red-500/20" : "bg-red-500/[0.05] border border-red-500/10 hover:bg-red-500/10"
+                )}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20">
@@ -1752,9 +2056,9 @@ function App() {
                   <div>
                     <div className="flex items-center gap-1 mb-0.5">
                       <div className="w-1 h-1 rounded-full bg-red-500/40 shadow-[0_0_5px_rgba(239,68,68,0.2)]" />
-                      <p className="text-[7px] font-black uppercase tracking-[0.2em] text-white/10">Maintenance</p>
+                      <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-red-400" : "text-white/10")}>Maintenance</p>
                     </div>
-                    <span className="text-xs font-black text-red-500/70 uppercase tracking-widest">Wipe <span className="text-red-500/50">All Data</span></span>
+                    <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-red-600" : "text-red-500/70")}>Wipe <span className="text-red-500/50">All Data</span></span>
                   </div>
                 </div>
                 <AlertTriangle className="w-5 h-5 text-red-500/20 group-hover:animate-pulse" />
@@ -1769,13 +2073,16 @@ function App() {
                     message: 'Force refreshing the application will clear all temporary cache. Proceed?'
                   });
                 }}
-                className="w-full p-5 bg-sky-500/5 border border-sky-500/10 rounded-3xl flex items-center justify-between group hover:bg-sky-500/10 transition-all active:scale-[0.99]"
+                className={cn(
+                  "w-full p-5 rounded-3xl flex items-center justify-between group transition-all active:scale-[0.99] backdrop-blur-xl",
+                  theme === 'light' ? "bg-sky-500/15 border border-sky-500/30 shadow-sm hover:bg-sky-500/20" : "bg-sky-500/[0.05] border border-sky-500/10 hover:bg-sky-500/10"
+                )}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-sky-500/10 rounded-xl flex items-center justify-center border border-sky-500/20">
                     <RotateCcw className="w-5 h-5 text-sky-500" />
                   </div>
-                  <span className="text-xs font-black text-sky-500/70 uppercase tracking-widest">Force Update</span>
+                  <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-sky-600" : "text-sky-500/70")}>Force Update</span>
                 </div>
                 <RefreshCcw className="w-5 h-5 text-sky-500/20 group-hover:rotate-180 transition-transform duration-700" />
               </button>
@@ -1783,8 +2090,8 @@ function App() {
 
             {/* Footer Credits */}
             <div className="pt-12 flex flex-col items-center opacity-20">
-              <p className="text-[8px] font-black uppercase tracking-[0.6em] text-white">MAK GROUP SYSTEMS</p>
-              <p className="text-[6px] font-bold uppercase tracking-[0.4em] text-white/50 mt-2">Precision Trading Intelligence © 2026</p>
+              <p className={cn("text-[8px] font-black uppercase tracking-[0.6em]", theme === 'light' ? "text-slate-900" : "text-white")}>MAK GROUP SYSTEMS</p>
+              <p className={cn("text-[6px] font-bold uppercase tracking-[0.4em] mt-2", theme === 'light' ? "text-slate-600" : "text-white/50")}>Precision Trading Intelligence © 2026</p>
             </div>
 
             {/* Modals follow below as they are state-driven */}
@@ -1835,23 +2142,32 @@ function App() {
 
             {/* Confirmation Modal */}
             {confirmAction && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-                <div className="w-full max-w-xs bg-[#0A0A0C] border border-white/[0.05] rounded-[2.5rem] p-8 shadow-2xl scale-in-center">
+              <div className={cn(
+                "fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-xl animate-in fade-in duration-300",
+                theme === 'light' ? "bg-white/40" : "bg-black/95"
+              )}>
+                <div className={cn(
+                  "w-full max-w-xs border rounded-[2.5rem] p-8 shadow-2xl scale-in-center",
+                  theme === 'light' ? "bg-white border-slate-200" : "bg-[#0A0A0C] border-white/[0.05]"
+                )}>
                   <div className={cn(
                     "w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border animate-pulse",
                     confirmAction.type === 'reset' ? "bg-rose-500/10 border-rose-500/20" : "bg-sky-500/10 border-sky-500/20"
                   )}>
                     <RotateCcw className={cn("w-8 h-8", confirmAction.type === 'reset' ? "text-rose-500" : "text-sky-500")} />
                   </div>
-                  <h3 className="text-xl font-black text-white mb-2 tracking-tighter text-center">{confirmAction.title}</h3>
-                  <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mb-8 text-center leading-relaxed px-4">
+                  <h3 className={cn("text-xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>{confirmAction.title}</h3>
+                  <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] mb-8 text-center leading-relaxed px-4", theme === 'light' ? "text-slate-400" : "text-white/50")}>
                     {confirmAction.message}
                   </p>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => { setConfirmAction(null); haptic('light'); }}
-                      className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-white/60 text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors active:scale-95"
+                      className={cn(
+                        "p-4 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-colors active:scale-95",
+                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.03] border border-white/[0.05] text-white/60 hover:bg-white/10"
+                      )}
                     >
                       Abort
                     </button>
@@ -1881,13 +2197,22 @@ function App() {
 
             {/* Password Change Modal */}
             {isChangingPass && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="w-full max-w-sm bg-[#0A0A0C] border border-white/[0.05] rounded-[2rem] p-10 shadow-2xl scale-in-center">
-                  <div className="w-16 h-16 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <div className={cn(
+                "fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md animate-in fade-in duration-300",
+                theme === 'light' ? "bg-white/40" : "bg-black/90"
+              )}>
+                <div className={cn(
+                  "w-full max-w-sm border rounded-[2rem] p-10 shadow-2xl scale-in-center",
+                  theme === 'light' ? "bg-white border-slate-200" : "bg-[#0A0A0C] border-white/[0.05]"
+                )}>
+                  <div className={cn(
+                    "w-16 h-16 border rounded-3xl flex items-center justify-center mx-auto mb-8",
+                    theme === 'light' ? "bg-slate-50 border-slate-100" : "bg-white/[0.02] border border-white/[0.05]"
+                  )}>
                     <Lock className="w-8 h-8 text-primary/60" />
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-2 tracking-tighter text-center">Security Hub</h3>
-                  <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-10 text-center">Set 4-digit master code</p>
+                  <h3 className={cn("text-2xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>Security Hub</h3>
+                  <p className={cn("text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-center", theme === 'light' ? "text-slate-400" : "text-white/50")}>Set 4-digit master code</p>
                   
                   <input
                     type="password"
@@ -1895,13 +2220,19 @@ function App() {
                     placeholder="••••"
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value.replace(/\D/g, ''))}
-                    className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.8rem] p-6 text-center text-4xl tracking-[0.5em] font-black text-white focus:outline-none focus:border-primary/20 transition-all mb-10"
+                    className={cn(
+                      "w-full border rounded-[1.8rem] p-6 text-center text-4xl tracking-[0.5em] font-black focus:outline-none transition-all mb-10",
+                      theme === 'light' ? "bg-slate-50 border-slate-200 text-slate-800 focus:border-primary/40" : "bg-white/[0.01] border border-white/[0.05] text-white focus:border-primary/20"
+                    )}
                   />
 
                   <div className="grid grid-cols-2 gap-4">
                     <button 
                       onClick={() => { setIsChangingPass(false); setNewPass(''); haptic('light'); }}
-                      className="p-5 rounded-[1.2rem] bg-white/[0.03] border border-white/[0.05] text-white/60 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors active:scale-95"
+                      className={cn(
+                        "p-5 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-colors active:scale-95",
+                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.03] border border-white/[0.05] text-white/60 hover:bg-white/10"
+                      )}
                     >
                       Abort
                     </button>
@@ -1987,21 +2318,43 @@ function App() {
   };
 
   return (
-    <div className="h-screen bg-[#050507] font-sans selection:bg-primary/30 antialiased relative flex flex-col overflow-hidden">
+    <div className={cn(
+      "h-screen font-sans selection:bg-primary/30 antialiased relative flex flex-col overflow-hidden transition-colors duration-500",
+      theme === 'dark' ? "bg-[#050507]" : "bg-[#f8f9fa]"
+    )}>
       {/* iOS Glass Header - Fixed at top with safe area padding */}
-      <div className="fixed top-0 left-0 right-0 z-[60] backdrop-blur-3xl bg-black/60 border-b border-white/5">
+      <div className={cn(
+        "fixed top-0 left-0 right-0 z-[60] backdrop-blur-3xl border-b transition-colors duration-500",
+        theme === 'dark' ? "bg-black/60 border-white/5" : "bg-white/60 border-black/5"
+      )}>
         <div className="h-[env(safe-area-inset-top)] w-full" /> {/* Safe Area Spacer */}
         <div className="h-4 w-full" /> {/* Additional spacing requested by user */}
       </div>
       
-      {/* Premium Background Design - Pure Minimalist Dark */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#050507]">
-        <BackgroundSplitLogo />
+      {/* Premium Background Design - Dynamic Theme */}
+      {/* High Quality Image Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
+        <div className="absolute inset-0 bg-black" />
+        <img 
+          src="/background.png" 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover opacity-100"
+        />
+        
+        {/* Theme Overlay for Readability */}
+        <div className={cn(
+          "absolute inset-0 transition-all duration-500",
+          theme === 'light' ? "bg-white/10" : "bg-black/30"
+        )} />
+        
         {/* Grain/Noise Texture for Premium Feel */}
-        <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className={cn(
+          "absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]",
+          theme === 'light' && "invert"
+        )} />
       </div>
 
-      {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} />}
+      {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} theme={theme} />}
       
       {/* Hidden Share Card for Capture */}
       <ShareCard 
@@ -2014,6 +2367,7 @@ function App() {
           period: 'Overall',
           healthScore: geniusMetrics.healthScore
         }}
+        theme={theme}
       />
 
       {/* Main Content Area */}
@@ -2024,13 +2378,16 @@ function App() {
       </main>
 
       {/* iOS 26 Tab Bar */}
-      <nav className="fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 bg-black/40 backdrop-blur-2xl border border-white/10 px-2 py-2 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2.5rem]">
+      <nav className={cn(
+        "fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 backdrop-blur-[40px] border px-2 py-2 flex items-center justify-between shadow-2xl rounded-[2.5rem]",
+        theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.01] border-white/5"
+      )}>
         <button onClick={() => { setActiveTab('home'); haptic('light'); }} className="flex-1 flex justify-center group py-1">
           <div className={cn(
             "p-2.5 sm:p-3.5 transition-all duration-300 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center min-w-[50px] sm:min-w-[70px]",
             activeTab === 'home' 
-              ? "bg-white/[0.08] text-white shadow-xl scale-110 border border-white/10" 
-              : "text-white/20 group-hover:text-white/40"
+              ? (theme === 'light' ? "bg-black/[0.05] text-slate-900 shadow-xl scale-110 border border-black/5" : "bg-white/[0.05] text-white shadow-xl scale-110 border border-white/10")
+              : (theme === 'light' ? "text-slate-900/20 group-hover:text-slate-900/40" : "text-white/20 group-hover:text-white/40")
           )}>
             <LayoutGrid className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
@@ -2039,8 +2396,8 @@ function App() {
           <div className={cn(
             "p-2.5 sm:p-3.5 transition-all duration-300 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center min-w-[50px] sm:min-w-[70px]",
             activeTab === 'analytics' 
-              ? "bg-white/[0.08] text-white shadow-xl scale-110 border border-white/10" 
-              : "text-white/20 group-hover:text-white/40"
+              ? (theme === 'light' ? "bg-black/[0.05] text-slate-900 shadow-xl scale-110 border border-black/5" : "bg-white/[0.05] text-white shadow-xl scale-110 border border-white/10")
+              : (theme === 'light' ? "text-slate-900/20 group-hover:text-slate-900/40" : "text-white/20 group-hover:text-white/40")
           )}>
             <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
@@ -2050,9 +2407,12 @@ function App() {
         <div className="flex-1 flex items-center justify-center -mt-10 sm:-mt-14">
           <button 
             onClick={() => { fileInputRef.current?.click(); haptic('medium'); }}
-            className="w-16 h-16 sm:w-20 sm:h-20 bg-white/[0.05] backdrop-blur-[40px] rounded-[2rem] sm:rounded-[2.5rem] p-3 sm:p-4 border border-white/[0.15] shadow-[0_15px_35px_rgba(0,0,0,0.6)] active:scale-90 transition-all duration-300 flex items-center justify-center group relative overflow-hidden"
+            className={cn(
+              "w-16 h-16 sm:w-20 sm:h-20 backdrop-blur-[50px] rounded-[2rem] sm:rounded-[2.5rem] p-3 sm:p-4 border shadow-[0_15px_35px_rgba(0,0,0,0.4)] active:scale-90 transition-all duration-300 flex items-center justify-center group relative overflow-hidden",
+              theme === 'light' ? "bg-white/80 border-white/60" : "bg-white/[0.02] border-white/5"
+            )}
           >
-            <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity", theme === 'light' ? "bg-black/5" : "bg-white/5")} />
             <img 
                src={logo} 
                alt="Logo" 
@@ -2072,8 +2432,8 @@ function App() {
           <div className={cn(
             "p-2.5 sm:p-3.5 transition-all duration-300 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center min-w-[50px] sm:min-w-[70px]",
             activeTab === 'reports' 
-              ? "bg-white/[0.08] text-white shadow-xl scale-110 border border-white/10" 
-              : "text-white/20 group-hover:text-white/40"
+              ? (theme === 'light' ? "bg-black/[0.05] text-slate-900 shadow-xl scale-110 border border-black/5" : "bg-white/[0.05] text-white shadow-xl scale-110 border border-white/10")
+              : (theme === 'light' ? "text-slate-900/20 group-hover:text-slate-900/40" : "text-white/20 group-hover:text-white/40")
           )}>
             <FileSpreadsheet className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
@@ -2083,8 +2443,8 @@ function App() {
           <div className={cn(
             "p-2.5 sm:p-3.5 transition-all duration-300 rounded-[1.2rem] sm:rounded-[1.5rem] flex items-center justify-center min-w-[50px] sm:min-w-[70px]",
             activeTab === 'settings' 
-              ? "bg-white/[0.05] text-white shadow-xl scale-110 border border-white/10" 
-              : "text-white/20 group-hover:text-white/40"
+              ? (theme === 'light' ? "bg-black/[0.05] text-slate-900 shadow-xl scale-110 border border-black/5" : "bg-white/[0.05] text-white shadow-xl scale-110 border border-white/10")
+              : (theme === 'light' ? "text-slate-900/20 group-hover:text-slate-900/40" : "text-white/20 group-hover:text-white/40")
           )}>
             <Settings className="w-6 h-6 sm:w-7 sm:h-7" />
           </div>
@@ -2231,6 +2591,94 @@ function App() {
             >
               Update Ledger
             </button>
+          </div>
+        </>
+      )}
+
+      {/* Withdrawal Modal */}
+      {isAddingWithdrawal && (
+        <>
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[110] animate-fade-in" onClick={() => setIsAddingWithdrawal(false)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[120] w-[90%] max-w-sm bg-white/[0.01] backdrop-blur-[30px] border border-white/5 rounded-[2.5rem] p-10 animate-in zoom-in duration-300 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent rounded-[2.5rem] pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <LogOut className="w-8 h-8 text-red-500 rotate-90" />
+              </div>
+              <h3 className="text-xl font-black text-center mb-2 text-white tracking-tighter">Withdraw Profit</h3>
+              <p className="text-[10px] font-black text-center mb-8 text-white/20 uppercase tracking-widest">Specify the amount to withdraw</p>
+              
+              <div className="space-y-4">
+                <div className="relative">
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-white/10">$</span>
+                  <input 
+                    type="number" 
+                    value={withdrawalAmount} 
+                    onChange={(e) => setWithdrawalAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.8rem] p-8 text-center text-4xl font-black text-white outline-none focus:border-red-500/20 transition-all"
+                    autoFocus
+                  />
+                </div>
+                
+                <input 
+                  type="text" 
+                  value={withdrawalNote} 
+                  onChange={(e) => setWithdrawalNote(e.target.value)}
+                  placeholder="Notes (Optional)"
+                  className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.2rem] p-4 text-center text-sm font-medium text-white/60 outline-none focus:border-white/10 transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-8">
+                <button 
+                  onClick={() => setIsAddingWithdrawal(false)}
+                  className="py-5 bg-white/[0.02] text-white/40 border border-white/[0.05] rounded-[1.2rem] font-black uppercase tracking-[0.2em] text-[10px] active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={addWithdrawal}
+                  className="py-5 bg-red-500 text-white rounded-[1.2rem] font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_rgba(239,68,68,0.2)] active:scale-95 transition-all"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {/* Glassmorphism Delete Confirmation Modal */}
+      {recordToDelete && (
+        <>
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[200] animate-fade-in" onClick={() => setRecordToDelete(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[210] w-[85%] max-w-xs bg-white/[0.03] backdrop-blur-[50px] border border-white/10 rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
+            
+            <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-red-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Trash2 className="w-8 h-8 text-red-500 relative z-10" />
+            </div>
+
+            <h3 className="text-xl font-black text-center mb-2 text-white tracking-tighter">Confirm Deletion</h3>
+            <p className="text-[10px] font-black text-center mb-8 text-white/30 uppercase tracking-[0.2em] leading-relaxed">
+              Are you sure you want to revert this withdrawal? This action cannot be undone.
+            </p>
+
+            <div className="space-y-3">
+              <button 
+                onClick={confirmDelete}
+                className="w-full py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_rgba(239,68,68,0.2)] active:scale-95 transition-all"
+              >
+                Delete Permanently
+              </button>
+              <button 
+                onClick={() => setRecordToDelete(null)}
+                className="w-full py-4 bg-white/[0.05] text-white/60 border border-white/10 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-white/10 transition-all active:scale-95"
+              >
+                Keep Record
+              </button>
+            </div>
           </div>
         </>
       )}

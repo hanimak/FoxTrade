@@ -75,11 +75,12 @@ export const calculateSessionStats = (trades: MT5Trade[]): SessionStats[] => {
 
 export const getSmartInsights = (records: DailyRecord[], reportTrades: MT5Trade[] = []): SmartInsight[] => {
   const insights: SmartInsight[] = [];
-  if (records.length < 3) return insights;
+  const tradeRecords = records.filter(r => r.type !== 'withdrawal');
+  if (tradeRecords.length < 3) return insights;
 
   // 1. Best Trading Day Analysis
   const dayStats: Record<string, { profit: number, count: number }> = {};
-  records.forEach(r => {
+  tradeRecords.forEach(r => {
     const day = new Date(r.date).toLocaleString('en-US', { weekday: 'long' });
     if (!dayStats[day]) dayStats[day] = { profit: 0, count: 0 };
     dayStats[day].profit += r.profitLoss;
@@ -138,7 +139,7 @@ export const getSmartInsights = (records: DailyRecord[], reportTrades: MT5Trade[
   }
 
   // 4. Consistency Insight
-  const winRate = (records.filter(r => r.profitLoss > 0).length / records.length) * 100;
+  const winRate = (tradeRecords.filter(r => r.profitLoss > 0).length / tradeRecords.length) * 100;
   if (winRate > 60) {
     insights.push({
       type: 'success',
@@ -196,39 +197,48 @@ export const calculateStatistics = (records: DailyRecord[], initialCapital: numb
     });
   } else {
     // Fallback to daily records if no individual trades
-    const wins = records.filter(r => r.profitLoss > 0);
-    const losses = records.filter(r => r.profitLoss < 0);
+    // Only include trade records for performance statistics
+    const tradeRecords = records.filter(r => r.type !== 'withdrawal');
+    const wins = tradeRecords.filter(r => r.profitLoss > 0);
+    const losses = tradeRecords.filter(r => r.profitLoss < 0);
     grossProfit = wins.reduce((acc, r) => acc + r.profitLoss, 0);
     grossLoss = Math.abs(losses.reduce((acc, r) => acc + r.profitLoss, 0));
-    totalTradesCount = records.length;
+    totalTradesCount = tradeRecords.length;
     winningTradesCount = wins.length;
-    losingTradesCount = records.length - winningTradesCount;
+    losingTradesCount = tradeRecords.length - winningTradesCount;
   }
 
   // Sort by date ascending for drawdown calculation
   const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  // Drawdown Calculation - Account for withdrawals
   let peakCapital = initialCapital;
   let maxDrawdown = 0;
   let maxDrawdownValue = 0;
   let currentCapital = initialCapital;
 
-  // Drawdown Calculation
-  const capitalCurve = [initialCapital];
   sortedRecords.forEach(r => {
-    currentCapital += r.profitLoss;
-    capitalCurve.push(currentCapital);
-  });
-
-  capitalCurve.forEach(cap => {
-    if (cap > peakCapital) {
-      peakCapital = cap;
+    if (r.type === 'withdrawal') {
+      // For withdrawals, we subtract from current capital AND peak capital
+      // so it doesn't appear as a "trading loss" drawdown
+      const withdrawalAmount = Math.abs(r.profitLoss);
+      currentCapital -= withdrawalAmount;
+      peakCapital -= withdrawalAmount;
+      // Ensure peak capital doesn't go below current capital
+      if (peakCapital < currentCapital) peakCapital = currentCapital;
+    } else {
+      currentCapital += r.profitLoss;
+      
+      if (currentCapital > peakCapital) {
+        peakCapital = currentCapital;
+      }
+      
+      const drawdown = peakCapital - currentCapital;
+      const drawdownPercent = peakCapital > 0 ? (drawdown / peakCapital) * 100 : 0;
+      
+      if (drawdown > maxDrawdownValue) maxDrawdownValue = drawdown;
+      if (drawdownPercent > maxDrawdown) maxDrawdown = drawdownPercent;
     }
-    const drawdown = peakCapital - cap;
-    const drawdownPercent = peakCapital > 0 ? (drawdown / peakCapital) * 100 : 0;
-    
-    if (drawdown > maxDrawdownValue) maxDrawdownValue = drawdown;
-    if (drawdownPercent > maxDrawdown) maxDrawdown = drawdownPercent;
   });
 
   const winRate = totalTradesCount > 0 ? (winningTradesCount / totalTradesCount) * 100 : 0;
@@ -237,10 +247,12 @@ export const calculateStatistics = (records: DailyRecord[], initialCapital: numb
   const averageWin = winningTradesCount > 0 ? grossProfit / winningTradesCount : 0;
   const averageLoss = losingTradesCount > 0 ? grossLoss / losingTradesCount : 0;
 
-  const bestDay = records.length > 0 ? Math.max(...records.map(r => r.profitLoss)) : 0;
-  const worstDay = records.length > 0 ? Math.min(...records.map(r => r.profitLoss)) : 0;
+  const tradeRecordsOnly = records.filter(r => r.type !== 'withdrawal');
+  const bestDay = tradeRecordsOnly.length > 0 ? Math.max(...tradeRecordsOnly.map(r => r.profitLoss)) : 0;
+  const worstDay = tradeRecordsOnly.length > 0 ? Math.min(...tradeRecordsOnly.map(r => r.profitLoss)) : 0;
 
-  const totalProfit = records.reduce((acc, r) => acc + r.profitLoss, 0);
+  // Total profit should be from trades only
+  const totalProfit = tradeRecordsOnly.reduce((acc, r) => acc + r.profitLoss, 0);
   const expectedValue = totalTradesCount > 0 ? totalProfit / totalTradesCount : 0;
   const winLossRatio = averageLoss === 0 ? averageWin : averageWin / averageLoss;
 
@@ -269,8 +281,11 @@ export const getPeriodStats = (records: DailyRecord[]) => {
   const monthlyStats: Record<string, number> = {};
   const dailyByDateStats: Record<string, number> = {};
 
+  // Filter out withdrawals for period profit statistics
+  const tradeRecords = records.filter(r => r.type !== 'withdrawal');
+  
   // Sort records by date to ensure the daily distribution follows chronological order
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedRecords = [...tradeRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   sortedRecords.forEach(record => {
     const date = new Date(record.date);

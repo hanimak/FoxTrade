@@ -6,6 +6,7 @@ export interface DailyRecord {
   capitalAfter: number;
   notes?: string;
   isMT5Import?: boolean;
+  type?: 'trade' | 'withdrawal';
   mt5Details?: {
     tradeCount: number;
     winCount: number;
