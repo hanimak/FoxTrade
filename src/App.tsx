@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 // Force Update v36.0
-import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, Sun, Moon, FileText, Calendar } from 'lucide-react';
+import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, Sun, Moon, FileText, Calendar, UserCircle } from 'lucide-react';
 import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
 import * as XLSX from 'xlsx';
 import { toPng } from 'html-to-image';
 import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
-const logo = "app-logo-new.png";
+import logo from './assets/app-logo-new.png';
 import { LockScreen } from './components/LockScreen';
 import { ShareCard } from './components/ShareCard';
 import LivePriceTicker from './components/LivePriceTicker';
@@ -78,6 +78,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
+  const [profileImgError, setProfileImgError] = useState(false);
   const isSyncingFromCloudRef = useRef(false);
   const shareCardRef = useRef<HTMLDivElement>(null);
   const [isSharing, setIsSharing] = useState(false);
@@ -445,6 +446,7 @@ function App() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setProfileImgError(false);
     });
 
     return () => {
@@ -507,53 +509,70 @@ function App() {
           // If Cloud is newer than our last local update, we REPLACE local state with Cloud.
           // Or if it's the first run, we take the cloud data if it exists.
           if (isFirstRun || cloudLastSynced > lastLocalUpdateTimeRef.current + 2000) { 
-            console.log(isFirstRun ? 'Initial sync from cloud...' : 'Cloud is newer, performing authoritative sync...');
-            
-            // Set flag to prevent push back to cloud
-            isSyncingFromCloudRef.current = true;
-            
-            // 1. Sync Records
-            if (cloudData.records) {
-              const cloudRecords = cloudData.records as DailyRecord[];
-              setRecords(cloudRecords);
-              localStorage.setItem('trade_records', JSON.stringify(cloudRecords));
-            }
+            // Deep check if data is actually different before notifying
+            const hasRecordChanges = JSON.stringify(cloudData.records || []) !== JSON.stringify(records);
+            const hasTradeChanges = JSON.stringify(cloudData.reportTrades || []) !== JSON.stringify(reportTrades);
+            const hasSettingsChanges = 
+              cloudData.initialCapital !== initialCapital ||
+              cloudData.weeklyTarget !== weeklyTarget ||
+              cloudData.monthlyTarget !== monthlyTarget ||
+              cloudData.showTargetsOnHome !== showTargetsOnHome;
 
-            // 2. Sync Report Trades
-            if (cloudData.reportTrades) {
-              const cloudTrades = cloudData.reportTrades as MT5Trade[];
-              setReportTrades(cloudTrades);
-              localStorage.setItem('report_trades', JSON.stringify(cloudTrades));
-            }
+            const isDataDifferent = hasRecordChanges || hasTradeChanges || hasSettingsChanges;
 
-            // 3. Sync Settings
-            if (cloudData.initialCapital !== undefined) {
-              setInitialCapital(cloudData.initialCapital);
-              localStorage.setItem('initial_capital', cloudData.initialCapital.toString());
-            }
-            if (cloudData.weeklyTarget !== undefined) {
-              setWeeklyTarget(cloudData.weeklyTarget);
-              localStorage.setItem('weekly_target', cloudData.weeklyTarget.toString());
-            }
-            if (cloudData.monthlyTarget !== undefined) {
-              setMonthlyTarget(cloudData.monthlyTarget);
-              localStorage.setItem('monthly_target', cloudData.monthlyTarget.toString());
-            }
-            if (cloudData.showTargetsOnHome !== undefined) {
-              setShowTargetsOnHome(cloudData.showTargetsOnHome);
-              localStorage.setItem('show_targets_on_home', cloudData.showTargetsOnHome.toString());
-            }
+            if (isDataDifferent) {
+              console.log(isFirstRun ? 'Initial sync from cloud...' : 'Cloud is newer and different, performing authoritative sync...');
+              
+              // Set flag to prevent push back to cloud
+              isSyncingFromCloudRef.current = true;
+              
+              // 1. Sync Records
+              if (cloudData.records) {
+                const cloudRecords = cloudData.records as DailyRecord[];
+                setRecords(cloudRecords);
+                localStorage.setItem('trade_records', JSON.stringify(cloudRecords));
+              }
 
-            if (!isFirstRun) {
-              sendNotification('Cloud Sync', 'Data updated from other device.');
+              // 2. Sync Report Trades
+              if (cloudData.reportTrades) {
+                const cloudTrades = cloudData.reportTrades as MT5Trade[];
+                setReportTrades(cloudTrades);
+                localStorage.setItem('report_trades', JSON.stringify(cloudTrades));
+              }
+
+              // 3. Sync Settings
+              if (cloudData.initialCapital !== undefined) {
+                setInitialCapital(cloudData.initialCapital);
+                localStorage.setItem('initial_capital', cloudData.initialCapital.toString());
+              }
+              if (cloudData.weeklyTarget !== undefined) {
+                setWeeklyTarget(cloudData.weeklyTarget);
+                localStorage.setItem('weekly_target', cloudData.weeklyTarget.toString());
+              }
+              if (cloudData.monthlyTarget !== undefined) {
+                setMonthlyTarget(cloudData.monthlyTarget);
+                localStorage.setItem('monthly_target', cloudData.monthlyTarget.toString());
+              }
+              if (cloudData.showTargetsOnHome !== undefined) {
+                setShowTargetsOnHome(cloudData.showTargetsOnHome);
+                localStorage.setItem('show_targets_on_home', cloudData.showTargetsOnHome.toString());
+              }
+
+              if (!isFirstRun) {
+                sendNotification('Cloud Sync', 'Data updated from other device.');
+              }
+              lastLocalUpdateTimeRef.current = Date.now(); 
+              
+              // Reset flag after states are updated (useEffect will trigger after this)
+              // We use a small timeout to ensure the push useEffect sees the flag
+              setTimeout(() => {
+                isSyncingFromCloudRef.current = false;
+              }, 5000);
+            } else {
+              // If data is identical, just update our local sync timestamp to match cloud
+              // to avoid unnecessary re-checks, but no notification or state updates needed
+              lastLocalUpdateTimeRef.current = cloudLastSynced;
             }
-            lastLocalUpdateTimeRef.current = Date.now(); 
-            
-            // Reset flag after states are updated (useEffect will trigger after this)
-            // We use a small timeout to ensure the push useEffect sees the flag
-            setTimeout(() => {
-              isSyncingFromCloudRef.current = false;
-            }, 5000);
           }
         }
         isFirstRun = false;
@@ -1201,12 +1220,19 @@ function App() {
                 isScrolled ? "scale-[0.92] sm:scale-[0.95]" : "scale-100"
               )}>
                 <div className={cn(
-                  "ios-card transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden border-none outline-none ring-0",
+                  "ios-card transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden border-none outline-none ring-0 relative",
                   theme === 'light' 
                     ? "bg-primary/5 shadow-none" 
                     : "bg-primary/[0.03] shadow-none",
                   isScrolled ? "pt-1.5 pb-1.5 h-[75px] sm:h-[110px]" : "pt-6 pb-10 h-auto shadow-2xl"
                 )}>
+                  {/* Theme-based Edge Border Overlay */}
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.2px] border-black/5" : "border-[0.2px] border-white/10",
+                    "shadow-[0_0_1px_rgba(255,255,255,0.05)]"
+                  )} />
+
                   {/* Bottom Blur Effect for Card on scroll - Hidden to avoid double blur */}
                   <div className={cn(
                     "absolute inset-x-0 bottom-0 h-1/2 pointer-events-none transition-opacity duration-700 hidden",
@@ -1523,7 +1549,13 @@ function App() {
             {showTargetsOnHome && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-0">
                 {/* Weekly Target */}
-                <div className="ios-card p-6 space-y-4">
+                <div className="ios-card p-6 space-y-4 relative overflow-hidden">
+                  {/* Theme-based Edge Border Overlay */}
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.2px] border-black/5" : "border-[0.2px] border-white/10",
+                    "shadow-[0_0_1px_rgba(255,255,255,0.05)]"
+                  )} />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Trophy className="w-3 h-3 text-amber-500/60" />
@@ -1548,7 +1580,13 @@ function App() {
                 </div>
 
                 {/* Monthly Target */}
-                <div className="ios-card p-6 space-y-4">
+                <div className="ios-card p-6 space-y-4 relative overflow-hidden">
+                  {/* Theme-based Edge Border Overlay */}
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.2px] border-black/5" : "border-[0.2px] border-white/10",
+                    "shadow-[0_0_1px_rgba(255,255,255,0.05)]"
+                  )} />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
@@ -2134,7 +2172,27 @@ function App() {
                     theme === 'light' ? "bg-white/40 border-white/60" : "bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-white/10"
                   )}>
                     {user ? (
-                      <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" />
+                      (() => {
+                        const photoURL = user.photoURL || user.providerData?.[0]?.photoURL;
+                        if (photoURL && !profileImgError) {
+                          return (
+                            <img 
+                              src={photoURL} 
+                              alt={user.displayName || ''} 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                console.error("Profile image failed to load:", photoURL);
+                                setProfileImgError(true);
+                              }}
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center bg-indigo-500/10">
+                            <UserCircle className="w-8 h-8 text-indigo-400" />
+                          </div>
+                        );
+                      })()
                     ) : (
                       <Cloud className="w-7 h-7 text-indigo-400" />
                     )}
@@ -2734,7 +2792,7 @@ function App() {
       {/* High Quality Image Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-black">
         <img 
-          src="background.png" 
+          src="/background.png" 
           alt="" 
           className="absolute inset-0 w-full h-full object-cover opacity-100 border-none outline-none ring-0"
         />

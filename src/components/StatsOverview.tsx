@@ -89,6 +89,13 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
             theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.02] border-white/[0.05]",
             isScrolled ? "py-1.5 sm:py-2 rounded-[1.8rem] h-[70px] flex items-center" : "py-3 sm:py-3 rounded-[2.5rem] h-auto"
           )}>
+            {/* Theme-based Edge Border Overlay */}
+            <div className={cn(
+              "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+              theme === 'light' ? "border-[0.2px] border-black/5" : "border-[0.2px] border-white/10",
+              "shadow-[0_0_1px_rgba(255,255,255,0.05)]"
+            )} />
+
             {/* Glossy Overlay like iOS notifications - Modified for Dark Mode transparency */}
             <div className={cn(
               "absolute inset-0 pointer-events-none",
