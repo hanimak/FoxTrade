@@ -23,96 +23,96 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
     <div className="max-w-[1400px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10 px-4">
       
       {/* Modern Unified PnL Overview */}
-      <div className="mb-4 sm:mb-6">
-        <div className="ios-card sm:py-6 shadow-xl group">
+      <div className="mb-3 sm:mb-4">
+        <div className="ios-card sm:py-3 shadow-lg group">
           {/* Vertical Side Label - Like Balance Card */}
           <div className={cn(
-            "absolute left-0 top-0 bottom-0 w-7 sm:w-10 hidden xs:flex items-center justify-center border-r backdrop-blur-md rounded-l-[2.5rem] overflow-hidden z-20",
-            theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]"
+            "absolute left-0 top-0 bottom-0 w-6 sm:w-8 hidden xs:flex items-center justify-center border-r backdrop-blur-md rounded-l-[2.5rem] overflow-hidden z-20",
+            theme === 'light' ? "bg-black/[0.01] border-black/[0.03]" : "bg-white/[0.01] border-white/[0.03]"
           )}>
             <div className="-rotate-90 whitespace-nowrap">
-              <p className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-primary/80 select-none drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+              <p className="text-[6px] sm:text-[8px] font-black uppercase tracking-[0.4em] sm:tracking-[0.6em] text-primary/70 select-none">
                 Net Performance
               </p>
             </div>
           </div>
 
           {/* Animated Background Gradient Glows */}
-          <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-rose-500/10 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-rose-500/5 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
           
-          <div className="relative z-10 p-5 sm:p-6 xs:pl-10 sm:pl-14 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-10">
+          <div className="relative z-10 p-3 sm:p-4 xs:pl-8 sm:pl-12 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
             {/* Main Net Profit Section */}
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2 mb-1">
                 <div className={cn(
-                  "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border backdrop-blur-xl",
+                  "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.1em] border backdrop-blur-xl",
                   stats.totalProfit >= 0 
-                    ? (theme === 'light' ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600" : "bg-emerald-500/5 border-emerald-500/20 text-emerald-500/70")
-                    : (theme === 'light' ? "bg-rose-500/15 border-rose-500/30 text-rose-600" : "bg-rose-500/5 border-rose-500/20 text-rose-500/70")
+                    ? (theme === 'light' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-emerald-500/5 border-emerald-500/15 text-emerald-500/60")
+                    : (theme === 'light' ? "bg-rose-500/10 border-rose-500/20 text-rose-600" : "bg-rose-500/5 border-rose-500/15 text-rose-500/60")
                 )}>
                   Overall Results
                 </div>
                 <div className={cn(
                   "h-px flex-1 bg-gradient-to-r to-transparent",
-                  theme === 'light' ? "from-black/10" : "from-white/10"
+                  theme === 'light' ? "from-black/5" : "from-white/5"
                 )} />
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div className={cn(
-                  "text-4xl sm:text-6xl font-black tracking-tighter flex items-baseline gap-1",
-                  theme === 'light' ? "text-slate-900" : "text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.05)]"
+                  "text-3xl sm:text-5xl font-black tracking-tighter flex items-baseline gap-1",
+                  theme === 'light' ? "text-slate-900" : "text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.03)]"
                 )}>
                   <span className={cn(
-                    "text-2xl sm:text-3xl opacity-20",
+                    "text-xl sm:text-2xl opacity-20",
                     stats.totalProfit >= 0 ? "text-emerald-500" : "text-rose-500"
                   )}>{stats.totalProfit >= 0 ? '+' : ''}</span>
                   {Math.round(stats.totalProfit).toLocaleString()}
-                  <span className={cn("text-lg sm:text-xl opacity-20 ml-1", theme === 'light' ? "text-slate-900" : "text-white")}>$</span>
+                  <span className={cn("text-base sm:text-lg opacity-20 ml-0.5", theme === 'light' ? "text-slate-900" : "text-white")}>$</span>
                 </div>
                 
                 {/* Visual indicator icon */}
                 <div className={cn(
-                  "hidden sm:flex w-12 h-12 rounded-2xl items-center justify-center border transition-transform duration-500 group-hover:scale-110 backdrop-blur-xl",
+                  "hidden sm:flex w-10 h-10 rounded-xl items-center justify-center border transition-transform duration-500 group-hover:scale-105 backdrop-blur-xl",
                   stats.totalProfit >= 0 
-                    ? (theme === 'light' ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 shadow-sm" : "bg-emerald-500/5 border-emerald-500/10 text-emerald-500")
-                    : (theme === 'light' ? "bg-rose-500/15 border-rose-500/30 text-rose-600 shadow-sm" : "bg-rose-500/5 border-rose-500/10 text-rose-500")
+                    ? (theme === 'light' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-emerald-500/5 border-emerald-500/10 text-emerald-500")
+                    : (theme === 'light' ? "bg-rose-500/10 border-rose-500/20 text-rose-600" : "bg-rose-500/5 border-rose-500/10 text-rose-500")
                 )}>
-                  {stats.totalProfit >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                  {stats.totalProfit >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
                 </div>
               </div>
             </div>
 
             {/* Metrics Breakdown Grid */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:w-1/3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:w-1/3">
               {/* Gross Profit Box */}
               <div className={cn(
-                "relative p-3 rounded-2xl border overflow-hidden group/box transition-all duration-300 backdrop-blur-xl",
-                theme === 'light' ? "bg-white/40 border-white/60 shadow-sm hover:bg-white/60" : "bg-white/[0.02] border-white/[0.03] hover:bg-white/[0.04]"
+                "relative p-2 rounded-xl border overflow-hidden group/box transition-all duration-300 backdrop-blur-xl",
+                theme === 'light' ? "bg-white/30 border-white/50 hover:bg-white/50" : "bg-white/[0.01] border-white/[0.02] hover:bg-white/[0.03]"
               )}>
-                <div className="absolute top-0 left-0 w-0.5 h-full bg-emerald-500/40" />
-                <p className={cn("text-[8px] font-black uppercase tracking-widest mb-1", theme === 'light' ? "text-slate-900/40" : "text-white/30")}>Revenue</p>
+                <div className="absolute top-0 left-0 w-0.5 h-full bg-emerald-500/30" />
+                <p className={cn("text-[7px] font-black uppercase tracking-widest mb-0.5", theme === 'light' ? "text-slate-900/30" : "text-white/20")}>Revenue</p>
                 <div className="flex items-baseline gap-1">
-                  <span className={cn("text-xl font-black tracking-tighter", theme === 'light' ? "text-slate-900" : "text-white")}>
+                  <span className={cn("text-lg font-black tracking-tighter", theme === 'light' ? "text-slate-900" : "text-white")}>
                     {Math.round(stats.grossProfit).toLocaleString()}
                   </span>
-                  <span className="text-[9px] font-bold text-emerald-500/50">$</span>
+                  <span className="text-[8px] font-bold text-emerald-500/40">$</span>
                 </div>
               </div>
 
               {/* Gross Loss Box */}
               <div className={cn(
-                "relative p-3 rounded-2xl border overflow-hidden group/box transition-all duration-300 backdrop-blur-xl",
-                theme === 'light' ? "bg-white/40 border-white/60 shadow-sm hover:bg-white/60" : "bg-white/[0.02] border-white/[0.03] hover:bg-white/[0.04]"
+                "relative p-2 rounded-xl border overflow-hidden group/box transition-all duration-300 backdrop-blur-xl",
+                theme === 'light' ? "bg-white/30 border-white/50 hover:bg-white/50" : "bg-white/[0.01] border-white/[0.02] hover:bg-white/[0.03]"
               )}>
-                <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-500/40" />
-                <p className={cn("text-[8px] font-black uppercase tracking-widest mb-1", theme === 'light' ? "text-slate-900/40" : "text-white/30")}>Drawdown</p>
+                <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-500/30" />
+                <p className={cn("text-[7px] font-black uppercase tracking-widest mb-0.5", theme === 'light' ? "text-slate-900/30" : "text-white/20")}>Drawdown</p>
                 <div className="flex items-baseline gap-1">
-                  <span className={cn("text-xl font-black tracking-tighter", theme === 'light' ? "text-slate-900" : "text-white")}>
+                  <span className={cn("text-lg font-black tracking-tighter", theme === 'light' ? "text-slate-900" : "text-white")}>
                     {Math.round(stats.grossLoss).toLocaleString()}
                   </span>
-                  <span className="text-[9px] font-bold text-rose-500/50">$</span>
+                  <span className="text-[8px] font-bold text-rose-500/40">$</span>
                 </div>
               </div>
             </div>
