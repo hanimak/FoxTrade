@@ -8,6 +8,7 @@ import { toPng } from 'html-to-image';
 import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
 import logo from './assets/app-logo-new.png';
+import background from './assets/background.png';
 import { LockScreen } from './components/LockScreen';
 import { ShareCard } from './components/ShareCard';
 import LivePriceTicker from './components/LivePriceTicker';
@@ -2792,7 +2793,7 @@ function App() {
       {/* High Quality Image Background */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-black">
         <img 
-          src="/background.png" 
+          src={background} 
           alt="" 
           className="absolute inset-0 w-full h-full object-cover opacity-100 border-none outline-none ring-0"
         />
