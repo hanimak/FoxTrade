@@ -160,15 +160,26 @@ function App() {
     }
   });
 
-  const [lastLocalUpdate, setLastLocalUpdate] = useState<number>(Date.now());
+  const [lastSyncTimestamp, setLastSyncTimestamp] = useState<number>(() => {
+    const saved = localStorage.getItem('last_sync_timestamp');
+    return saved ? parseInt(saved) : 0;
+  });
+
   const recordsRef = useRef<DailyRecord[]>(records);
-  const lastLocalUpdateTimeRef = useRef<number>(Date.now());
+  const lastLocalUpdateTimeRef = useRef<number>(0); // Initialize to 0, only update on local changes
   
   useEffect(() => {
-    recordsRef.current = records;
-    lastLocalUpdateTimeRef.current = Date.now();
-    setLastLocalUpdate(Date.now());
-  }, [records]);
+      recordsRef.current = records;
+      if (!isSyncingFromCloudRef.current) {
+        lastLocalUpdateTimeRef.current = Date.now();
+      }
+    }, [records]);
+
+  useEffect(() => {
+    if (lastSyncTimestamp) {
+      localStorage.setItem('last_sync_timestamp', lastSyncTimestamp.toString());
+    }
+  }, [lastSyncTimestamp]);
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     return 'Notification' in window && Notification.permission === 'granted';
@@ -456,7 +467,9 @@ function App() {
           localStorage.setItem('show_targets_on_home', cloudData.showTargetsOnHome.toString());
         }
         
-        lastLocalUpdateTimeRef.current = Date.now();
+        const cloudLastSynced = cloudData.lastSynced ? new Date(cloudData.lastSynced).getTime() : Date.now();
+        setLastSyncTimestamp(cloudLastSynced);
+        
         setTimeout(() => {
           isSyncingFromCloudRef.current = false;
         }, 5000);
@@ -464,6 +477,7 @@ function App() {
         sendNotification('Sync Successful', 'Your data is now up to date with the cloud.');
       } else {
         // If doc doesn't exist, push current local data to create it
+        const now = new Date().toISOString();
         await setDoc(docRef, {
           records,
           initialCapital,
@@ -471,8 +485,9 @@ function App() {
           weeklyTarget,
           monthlyTarget,
           showTargetsOnHome,
-          lastSynced: new Date().toISOString()
+          lastSynced: now
         });
+        setLastSyncTimestamp(new Date(now).getTime());
         sendNotification('Cloud Initialized', 'Your local data has been backed up to the cloud.');
       }
     } catch (error) {
@@ -512,6 +527,7 @@ function App() {
         try {
           setIsPushing(true);
           const docRef = doc(db, 'users', user.uid);
+          const now = new Date().toISOString();
           await setDoc(docRef, {
             records,
             initialCapital,
@@ -519,8 +535,9 @@ function App() {
             weeklyTarget,
             monthlyTarget,
             showTargetsOnHome,
-            lastSynced: new Date().toISOString()
+            lastSynced: now
           }, { merge: true });
+          setLastSyncTimestamp(new Date(now).getTime());
         } catch (error) {
           console.error('Sync to cloud error:', error);
         } finally {
@@ -555,10 +572,12 @@ function App() {
           const cloudData = snapshot.data();
           const cloudLastSynced = cloudData.lastSynced ? new Date(cloudData.lastSynced).getTime() : 0;
 
-          // AUTHORITATIVE SYNC: 
-          // If Cloud is newer than our last local update, we REPLACE local state with Cloud.
-          // Or if it's the first run, we take the cloud data if it exists.
-          if (isFirstRun || cloudLastSynced > lastLocalUpdateTimeRef.current + 2000) { 
+          // Sync if:
+          // 1. It's the first run
+          // 2. Cloud has newer data than our last successful sync
+          const isCloudNewer = cloudLastSynced > lastSyncTimestamp;
+
+          if (isFirstRun || isCloudNewer) { 
             // Deep check if data is actually different before notifying
             const hasRecordChanges = JSON.stringify(cloudData.records || []) !== JSON.stringify(records);
             const hasTradeChanges = JSON.stringify(cloudData.reportTrades || []) !== JSON.stringify(reportTrades);
@@ -571,7 +590,7 @@ function App() {
             const isDataDifferent = hasRecordChanges || hasTradeChanges || hasSettingsChanges;
 
             if (isDataDifferent) {
-              console.log(isFirstRun ? 'Initial sync from cloud...' : 'Cloud is newer and different, performing merge sync...');
+              console.log(isFirstRun ? 'Initial sync from cloud...' : 'Cloud has newer/different data, performing merge sync...');
               
               // Set flag to prevent push back to cloud
               isSyncingFromCloudRef.current = true;
@@ -645,17 +664,16 @@ function App() {
               if (!isFirstRun) {
                 sendNotification('Cloud Sync', 'Data updated from other device.');
               }
-              lastLocalUpdateTimeRef.current = Date.now(); 
               
-              // Reset flag after states are updated (useEffect will trigger after this)
-              // We use a small timeout to ensure the push useEffect sees the flag
+              setLastSyncTimestamp(cloudLastSynced);
+              
+              // Reset flag after states are updated
               setTimeout(() => {
                 isSyncingFromCloudRef.current = false;
               }, 5000);
             } else {
               // If data is identical, just update our local sync timestamp to match cloud
-              // to avoid unnecessary re-checks, but no notification or state updates needed
-              lastLocalUpdateTimeRef.current = cloudLastSynced;
+              setLastSyncTimestamp(cloudLastSynced);
             }
           }
         }
