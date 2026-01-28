@@ -98,7 +98,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
           )} />
 
           <div className={cn(
-            "ios-card shadow-2xl group transition-all duration-700 relative overflow-visible backdrop-blur-md border",
+            "ios-card shadow-2xl group transition-all duration-700 relative overflow-hidden sm:overflow-visible backdrop-blur-md border",
             theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/[0.05]",
             isScrolled ? "sm:py-2 sm:rounded-[1.5rem] sm:h-[70px] sm:flex sm:items-center py-3 h-auto" : "py-3 sm:py-3 h-auto"
           )}>
@@ -309,7 +309,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
       <div className="space-y-6 pt-4 relative z-10">
         {/* Embedded Portfolio Growth Chart */}
       <div className={cn(
-        "ios-card w-full backdrop-blur-[40px] border overflow-visible p-4 sm:p-10 shadow-2xl relative group",
+        "ios-card w-full backdrop-blur-[40px] border overflow-hidden sm:overflow-visible p-4 sm:p-10 shadow-2xl relative group",
         theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/[0.05]"
       )}>
         {/* Background Decorative Glow */}
@@ -340,7 +340,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Weekly Performance */}
         <div className={cn(
-          "ios-card backdrop-blur-[40px] border overflow-visible p-8 shadow-2xl relative group",
+          "ios-card backdrop-blur-[40px] border overflow-hidden sm:overflow-visible p-8 shadow-2xl relative group",
           theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/[0.05]"
         )}>
           {/* Background Decorative Glow */}
@@ -399,7 +399,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
 
         {/* Daily Distribution */}
         <div className={cn(
-          "ios-card backdrop-blur-[40px] border overflow-visible p-8 shadow-2xl relative group",
+          "ios-card backdrop-blur-[40px] border overflow-hidden sm:overflow-visible p-8 shadow-2xl relative group",
           theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/[0.05]"
         )}>
           {/* Background Decorative Glow */}
@@ -459,7 +459,7 @@ export function StatsOverview({ stats, periodStats, records, initialCapital, ses
 
       {/* Session Profitability Analysis */}
       <div className={cn(
-        "ios-card backdrop-blur-[40px] border overflow-visible p-8 shadow-2xl relative group",
+        "ios-card backdrop-blur-[40px] border overflow-hidden sm:overflow-visible p-8 shadow-2xl relative group",
         theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/[0.05]"
       )}>
         {/* Background Decorative Glow */}
@@ -540,7 +540,8 @@ function StatCard({
   return (
     <div 
       className={cn(
-        "ios-card-mini overflow-visible relative group/stat backdrop-blur-md border p-2 sm:p-4 transition-all duration-500 hover:scale-[1.02]",
+        "ios-card-mini relative group/stat backdrop-blur-md border p-2 sm:p-4 transition-all duration-500 hover:scale-[1.02]",
+        "overflow-hidden sm:overflow-visible",
         theme === 'light' ? "bg-white/60 border-white/60 hover:bg-white/80" : "bg-white/[0.05] border-white/[0.05] hover:bg-white/[0.04] hover:border-white/10"
       )}
       onMouseEnter={() => haptic('light')}
