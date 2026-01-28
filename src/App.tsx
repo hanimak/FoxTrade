@@ -1992,7 +1992,6 @@ function App() {
                   "inline-flex items-center gap-2.5 px-6 py-2 border rounded-full shadow-2xl",
                   theme === 'light' ? "bg-black/[0.05] border-black/[0.05]" : "bg-white/[0.05] border border-white/[0.05]"
                 )}>
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                   <p className={cn("text-[11px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/30" : "text-white/30")}>Trade Report</p>
                 </div>
               </div>
@@ -2318,7 +2317,6 @@ function App() {
                     "flex items-center gap-1.5 mb-0.5 transition-all duration-500",
                     isScrolled ? "opacity-0 h-0 overflow-hidden" : "opacity-100 h-auto"
                   )}>
-                    <div className="w-1 h-1 rounded-full bg-primary" />
                     <p className={cn("text-[8px] font-black uppercase tracking-[0.3em]", theme === 'light' ? "text-slate-400" : "text-white/20")}>Control Center</p>
                   </div>
                   <h2 className={cn(
@@ -2521,7 +2519,6 @@ function App() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1 mb-0.5">
-                        <div className="w-1 h-1 rounded-full bg-primary/40" />
                         <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Information</p>
                       </div>
                       <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white/70")}>About <span className="text-primary/50">Fox Trade</span></span>
@@ -3143,7 +3140,6 @@ function App() {
               
               <div className="flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.05] border border-white/[0.05] rounded-full mb-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                   <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30">Data Ingestion</p>
                 </div>
               </div>

@@ -97,12 +97,13 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
   }, [handleNumberClick, handleDelete]);
 
   return (
-    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-white/[0.05]">
-      {/* High Quality Background Design - Uses App Background via Backdrop Blur */}
+    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/60">
+      {/* High Quality Background Design - Glass Effect */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/40" />
+        <div className="absolute inset-0 border-t border-white/[0.05]" />
         {/* Grain/Noise Texture for Consistency */}
-        <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center">
@@ -156,7 +157,7 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
             <button
               key={item.num}
               onClick={() => { handleNumberClick(item.num); haptic('light'); }}
-              className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/10 border border-white/20 flex flex-col items-center justify-center transition-all duration-200 active:bg-white/30 active:scale-95 group"
+              className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/[0.05] border border-white/[0.1] flex flex-col items-center justify-center transition-all duration-200 active:bg-white/[0.15] active:scale-95 group shadow-xl"
             >
               <span className="text-3xl sm:text-4xl font-normal text-white mb-0.5 leading-none">{item.num}</span>
               {item.letters && (
@@ -167,7 +168,7 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
           <div className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px]" />
           <button
             onClick={() => { handleNumberClick('0'); haptic('light'); }}
-            className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/10 border border-white/20 flex flex-col items-center justify-center transition-all duration-200 active:bg-white/30 active:scale-95 group"
+            className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/[0.05] border border-white/[0.1] flex flex-col items-center justify-center transition-all duration-200 active:bg-white/[0.15] active:scale-95 group shadow-xl"
           >
             <span className="text-3xl sm:text-4xl font-normal text-white mb-0.5 leading-none">0</span>
           </button>
