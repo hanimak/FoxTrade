@@ -69,7 +69,6 @@
   * {
     @apply border-transparent selection:bg-primary/30;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
@@ -188,8 +187,8 @@
 @layer components {
   /* Liquid Glass iOS26 Design System */
   .glass-morphism {
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
   }
 
   .glass-card {
@@ -243,24 +242,24 @@
   .ios-card {
     @apply relative transition-all duration-700 overflow-visible;
     border-radius: 2.5rem;
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     @apply p-4 sm:p-6;
   }
 
   .ios-premium-card {
     @apply relative transition-all duration-700 overflow-visible;
     border-radius: 3rem;
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    backdrop-filter: blur(20px) saturate(200%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
     @apply p-6 sm:p-8;
   }
 
   .ios-card-mini {
     @apply relative transition-all duration-500 overflow-visible;
     border-radius: 1.5rem;
-    backdrop-filter: blur(20px) saturate(170%);
-    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
     @apply p-4;
   }
 
@@ -316,8 +315,8 @@
 
   .ios-tab-bar {
     @apply fixed bottom-8 left-6 right-6 h-[85px] z-50 flex items-center justify-around px-4 rounded-[2.5rem];
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
   }
 
   .dark .ios-tab-bar {

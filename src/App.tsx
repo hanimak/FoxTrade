@@ -263,7 +263,11 @@ function App() {
     return saved ? parseFloat(saved) : 1000;
   });
 
-  const [currentCapital, setCurrentCapital] = useState<number>(initialCapital);
+  const currentCapital = useMemo(() => {
+    const totalPL = records.reduce((acc, curr) => acc + curr.profitLoss, 0);
+    return parseFloat((initialCapital + totalPL).toFixed(2));
+  }, [records, initialCapital]);
+
   const [isAddingWithdrawal, setIsAddingWithdrawal] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [withdrawalNote, setWithdrawalNote] = useState('');
@@ -588,6 +592,9 @@ function App() {
     let isFirstRun = true;
 
     const autoFetch = async () => {
+      // Don't run if tab is hidden to save performance/battery
+      if (document.visibilityState === 'hidden') return;
+      
       if (isSyncing || isPushing) return;
       
       // Skip auto-fetch if we recently updated locally (within last 15s) 
@@ -715,40 +722,21 @@ function App() {
     };
 
     autoFetch(); // Run immediately on mount
-    const intervalId = setInterval(autoFetch, 30000); // 30 seconds
+    const intervalId = setInterval(autoFetch, 120000); // 120 seconds
     return () => clearInterval(intervalId);
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('report_trades', JSON.stringify(reportTrades));
-    lastLocalUpdateTimeRef.current = Date.now();
-  }, [reportTrades]);
-
-  useEffect(() => {
-    // Force cache refresh by checking version
-    // Fresh Start Version v36.0
-    const CURRENT_VERSION = 'v36.0';
-    const savedVersion = localStorage.getItem('app_version');
-    
-    if (savedVersion !== CURRENT_VERSION) {
-      // DISABLED AUTO-RELOAD TO STOP LOOP
-      localStorage.setItem('app_version', CURRENT_VERSION);
-      console.log('Version updated to:', CURRENT_VERSION);
-    }
-  }, []);
-
-  useEffect(() => {
-    const totalPL = records.reduce((acc, curr) => acc + curr.profitLoss, 0);
-    const newCapital = parseFloat((initialCapital + totalPL).toFixed(2));
-    setCurrentCapital(newCapital);
-    
     localStorage.setItem('trade_records', JSON.stringify(records));
     localStorage.setItem('initial_capital', initialCapital.toString());
-    localStorage.setItem('current_capital', newCapital.toString());
+    localStorage.setItem('current_capital', currentCapital.toString());
     localStorage.setItem('weekly_target', weeklyTarget.toString());
     localStorage.setItem('monthly_target', monthlyTarget.toString());
     localStorage.setItem('show_targets_on_home', showTargetsOnHome.toString());
-  }, [records, initialCapital, weeklyTarget, monthlyTarget, showTargetsOnHome]);
+    localStorage.setItem('report_trades', JSON.stringify(reportTrades));
+    
+    lastLocalUpdateTimeRef.current = Date.now();
+  }, [records, initialCapital, weeklyTarget, monthlyTarget, showTargetsOnHome, reportTrades, currentCapital]);
 
   const stats = useMemo(() => calculateStatistics(records, initialCapital, reportTrades), [records, initialCapital, reportTrades]);
   const periodStats = useMemo(() => getPeriodStats(records), [records]);
@@ -2323,7 +2311,7 @@ function App() {
                 isScrolled ? "opacity-0 h-0 overflow-hidden mb-0 scale-90" : "opacity-100 h-auto mb-8 scale-100"
               )}>
                 <div className={cn(
-                  "w-16 h-16 ios-card-mini overflow-visible p-0 flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group transition-all duration-700",
+                  "w-16 h-16 ios-card-mini overflow-visible p-0 flex items-center justify-center mb-4 shadow-2xl relative group transition-all duration-700",
                   theme === 'light' ? "bg-white/60 border border-white/50 shadow-lg" : "bg-white/[0.06] border border-white/10",
                   isScrolled ? "w-12 h-12 mb-2" : "w-16 h-16 mb-4"
                 )}>
@@ -2416,7 +2404,7 @@ function App() {
                 {user && (
                   <button 
                     onClick={() => { handleManualSync(); haptic('medium'); }}
-                    className="w-full py-4 ios-card-mini overflow-visible flex items-center justify-center gap-3 group active:scale-[0.98] transition-all backdrop-blur-xl"
+                    className="w-full py-4 ios-card-mini overflow-visible flex items-center justify-center gap-3 group active:scale-[0.98] transition-all"
                   >
                     <RefreshCcw className={cn("w-4 h-4 text-emerald-400", isSyncing && "animate-spin")} />
                     <span className={cn(
