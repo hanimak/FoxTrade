@@ -1,7 +1,7 @@
 import React from 'react';
 import { Sparkles, TrendingUp, TrendingDown, Trophy, Wallet } from 'lucide-react';
 import { cn } from '../lib/utils';
-import logo from '../assets/app-logo-new.png';
+const logo = 'app-logo-new.png';
 
 interface ShareCardProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
