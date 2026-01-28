@@ -1,5 +1,5 @@
 import { cn } from '../lib/utils';
-const logo = '/app-logo-new.png';
+import logo from '../assets/app-logo-new.png';
 
 export function BackgroundSplitLogo() {
   const theme = 'dark';

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Delete, ShieldCheck } from 'lucide-react';
 import { cn, haptic } from '../lib/utils';
-const logo = '/app-logo-new.png';
+import logo from '../assets/app-logo-new.png';
 
 interface LockScreenProps {
   onUnlock: () => void;
