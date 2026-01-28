@@ -70,7 +70,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
         <div className="z-10 flex flex-col items-center space-y-8 w-full">
           <div className={cn(
             "px-10 py-4 border rounded-full backdrop-blur-3xl",
-            "bg-white/[0.03] border-white/[0.05]"
+            "bg-white/[0.06] border-white/[0.05]"
           )}>
             <span className={cn(
               "text-3xl font-black uppercase tracking-[0.4em]",
@@ -113,8 +113,8 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
         {/* Stats Grid */}
         <div className="z-10 grid grid-cols-2 gap-10 w-full px-10">
           <div className={cn(
-            "border rounded-[4rem] p-12 flex flex-col items-center space-y-6 backdrop-blur-xl",
-            "bg-white/[0.02] border-white/[0.05]"
+            "ios-card overflow-visible border rounded-[4rem] p-12 flex flex-col items-center space-y-6 backdrop-blur-xl",
+            "bg-white/[0.05] border-white/[0.05]"
           )}>
             <div className="p-6 bg-primary/10 rounded-3xl">
               <Trophy className="w-14 h-14 text-primary" />
@@ -133,7 +133,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
 
           <div className={cn(
             "border rounded-[4rem] p-12 flex flex-col items-center space-y-6 backdrop-blur-xl",
-            "bg-white/[0.02] border-white/[0.05]"
+            "bg-white/[0.05] border-white/[0.05]"
           )}>
             <div className="p-6 bg-amber-500/10 rounded-3xl">
               <Sparkles className="w-14 h-14 text-amber-500" />
@@ -155,7 +155,7 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
         <div className="z-10 w-full flex flex-col items-center space-y-10 mb-10">
           <div className={cn(
             "flex items-center gap-6 px-10 py-5 border rounded-full",
-            "bg-white/[0.02] border-white/[0.05]"
+            "bg-white/[0.05] border-white/[0.05]"
           )}>
             <Wallet className={cn("w-8 h-8", "text-white/20")} />
             <span className={cn(

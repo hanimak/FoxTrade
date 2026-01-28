@@ -241,44 +241,73 @@
   }
 
   .ios-card {
-    @apply glass-morphism rounded-[2.5rem] p-4 sm:p-6 relative overflow-hidden;
+    @apply relative transition-all duration-700 overflow-visible;
+    border-radius: 2.5rem;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    @apply p-4 sm:p-6;
   }
 
-  .dark .ios-card {
+  .ios-premium-card {
+    @apply relative transition-all duration-700 overflow-visible;
+    border-radius: 3rem;
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    @apply p-6 sm:p-8;
+  }
+
+  .ios-card-mini {
+    @apply relative transition-all duration-500 overflow-visible;
+    border-radius: 1.5rem;
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    @apply p-4;
+  }
+
+  /* Shared premium effects for all cards */
+  .ios-card, .ios-card-mini, .ios-premium-card {
+    box-shadow: 
+      /* Outer depth shadow */
+      0 20px 40px -10px rgba(0, 0, 0, 0.3),
+      /* Inner bevel highlight (top edge) */
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+      /* Inner bevel shadow (bottom edge) */
+      inset 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .ios-card, .dark .ios-card-mini, .dark .ios-premium-card {
     background: linear-gradient(165deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
-    @apply border border-white/[0.08];
+    @apply border border-white/[0.05];
   }
 
-  .light .ios-card {
-    background: linear-gradient(165deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
-    @apply border border-white/[0.5] shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  .light .ios-card, .light .ios-card-mini, .light .ios-premium-card {
+    background: linear-gradient(165deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+    @apply border border-white/60;
+    box-shadow: 
+      0 15px 35px -5px rgba(0, 0, 0, 0.05),
+      inset 0 1px 2px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 1px 0 rgba(0, 0, 0, 0.03);
+  }
+
+  /* Edge Highlight Pseudo-element */
+  .ios-card::after, .ios-card-mini::after, .ios-premium-card::after {
+    content: '';
+    @apply absolute -inset-[1px] rounded-[inherit] pointer-events-none opacity-40;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.1) 100%);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    padding: 1px;
+    z-index: 1;
+  }
+
+  .dark .ios-card::after, .dark .ios-card-mini::after, .dark .ios-premium-card::after {
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
   }
 
   .ios-card-highlight {
     @apply relative overflow-hidden rounded-[2.5rem] p-6;
-  }
-
-  .dark .ios-card-highlight {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-    @apply border border-white/[0.08];
-  }
-
-  .light .ios-card-highlight {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
-    @apply border border-white/[0.5] shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
-  }
-
-  .ios-card-mini {
-    @apply glass-morphism rounded-[1.5rem] p-4 flex flex-col gap-1;
-  }
-
-  .dark .ios-card-mini {
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  .light .ios-card-mini {
-    background: rgba(255, 255, 255, 0.5);
-    @apply border border-white/[0.5] shadow-[0_4px_12px_rgba(0,0,0,0.05)];
   }
 
   .ios-card:active, .ios-card-highlight:active, .ios-card-mini:active {

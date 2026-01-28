@@ -54,13 +54,19 @@ const LivePriceTicker: React.FC<LivePriceTickerProps> = ({ theme = 'dark' }) => 
         <div className="relative group">
           {/* Glass Card Container - Fixed Height and Overflow */}
           <div className={cn(
-            "relative backdrop-blur-xl h-[44px] flex items-center shadow-2xl overflow-hidden transition-all duration-500 rounded-2xl border",
-            theme === 'light' ? "bg-white/60 border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]"
+            "relative h-[44px] flex items-center bg-white/[0.05] backdrop-blur-[2px] border border-white/10 overflow-visible transition-all duration-500 rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.03)]"
           )}>
-            
-            {/* Cyberpunk Accents - Adjusted for rounded corners */}
-            <div className="absolute inset-y-0 left-0 w-1 bg-primary/40 blur-sm z-[30]" />
-            <div className="absolute inset-y-0 right-0 w-1 bg-primary/40 blur-sm z-[30]" />
+            {/* Glass Edge Highlight */}
+            <div 
+              className="absolute -inset-[1px] rounded-2xl pointer-events-none opacity-50 bg-gradient-to-br from-white/40 via-transparent to-white/10 z-10"
+              style={{
+                maskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                maskComposite: 'exclude',
+                WebkitMaskComposite: 'xor',
+                padding: '1px'
+              }}
+            />
             
             {/* Ticker Content Container - Simplified for containment */}
             <div className="w-full h-full flex items-center justify-center">

@@ -8,7 +8,7 @@ import { toPng } from 'html-to-image';
 import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
 import logo from './assets/app-logo-new.png';
-import background from './assets/background.png';
+const background = '/background.png';
 import { LockScreen } from './components/LockScreen';
 import { ShareCard } from './components/ShareCard';
 import LivePriceTicker from './components/LivePriceTicker';
@@ -1330,16 +1330,28 @@ function App() {
                 isScrolled ? "scale-[0.92] sm:scale-[0.95]" : "scale-100"
               )}>
                 <div className={cn(
-                  "ios-card transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden border-none outline-none ring-0 relative",
+                  "ios-card transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-none outline-none ring-0 relative",
                   theme === 'light' 
                     ? "bg-primary/5 shadow-none" 
-                    : "bg-primary/[0.03] shadow-none",
+                    : "bg-transparent shadow-none",
                   isScrolled ? "pt-1.5 pb-1.5 h-[75px] sm:h-[110px]" : "pt-6 pb-10 h-auto shadow-2xl"
                 )}>
+                  {/* Glass Edge Highlight */}
+                  <div 
+                    className="absolute -inset-[1px] rounded-[inherit] pointer-events-none opacity-80 bg-gradient-to-br from-white/60 via-transparent to-white/20 z-30"
+                    style={{
+                      maskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                      maskComposite: 'exclude',
+                      WebkitMaskComposite: 'xor',
+                      padding: '1px'
+                    }}
+                  />
+
                   {/* Theme-based Edge Border Overlay */}
                   <div className={cn(
                     "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
-                    theme === 'light' ? "border-[0.2px] border-black/5" : "border-[0.2px] border-white/10",
+                    theme === 'light' ? "border-[0.2px] border-black/5" : "border-none",
                     "shadow-[0_0_1px_rgba(255,255,255,0.05)]"
                   )} />
 
@@ -1364,8 +1376,8 @@ function App() {
                       onClick={handleShare}
                       disabled={isSharing}
                       className={cn(
-                        "flex items-center justify-center gap-2 px-6 py-1.5 sm:p-3 rounded-full sm:rounded-2xl bg-white/[0.02] border border-white/[0.05] transition-all duration-300 active:scale-95",
-                        theme === 'light' && "bg-black/[0.02] border-black/[0.05]",
+                        "flex items-center justify-center gap-2 px-6 py-1.5 sm:p-3 rounded-full sm:rounded-2xl bg-white/[0.05] border border-white/[0.05] transition-all duration-300 active:scale-95",
+                        theme === 'light' && "bg-black/[0.05] border-black/[0.05]",
                         isSharing && "opacity-50 cursor-not-allowed"
                       )}
                     >
@@ -1385,7 +1397,7 @@ function App() {
                     {/* Vertical Side Label */}
                     <div className={cn(
                       "absolute left-0 top-0 bottom-0 w-8 sm:w-12 hidden xs:flex items-center justify-center border-r backdrop-blur-md rounded-l-[2.5rem] overflow-hidden z-20 transition-all duration-700",
-                      theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]",
+                      theme === 'light' ? "bg-black/[0.05] border-black/[0.05]" : "bg-white/[0.05] border-white/[0.05]",
                       isScrolled ? "opacity-0 -translate-x-full" : "opacity-100 translate-x-0"
                     )}>
                       <div className="-rotate-90 whitespace-nowrap">
@@ -1418,7 +1430,7 @@ function App() {
                             <div key={session.name} className={cn(
                               "transition-all duration-300 flex items-center gap-1",
                               !session.active && "opacity-20",
-                              isScrolled ? "p-0 h-3" : "p-1.5 rounded-lg border bg-white/[0.01] border-white/[0.05]"
+                              isScrolled ? "p-0 h-3" : "p-1.5 rounded-lg border bg-white/[0.05] border-white/[0.05]"
                             )}>
                               <div className={cn(
                                 "rounded-full",
@@ -1478,12 +1490,13 @@ function App() {
                           </div>
                           <h2 className={cn(
                             "font-black tracking-tighter flex items-baseline transition-all duration-700", 
-                            theme === 'light' ? "text-slate-900" : "text-white",
+                            theme === 'light' ? "text-slate-900" : "bg-gradient-to-b from-white via-white/80 to-white/30 bg-clip-text text-transparent drop-shadow-[0_4px_10px_rgba(255,255,255,0.2)]",
                             isScrolled ? "text-3xl xs:text-4xl sm:text-6xl" : "text-3xl xs:text-5xl sm:text-8xl"
                           )}>
                             {Math.floor(currentCapital).toLocaleString()}
                             <span className={cn(
-                              "text-primary flex items-baseline relative group/balance-dec transition-all duration-700",
+                              "flex items-baseline relative group/balance-dec transition-all duration-700",
+                              theme === 'light' ? "text-primary" : "bg-gradient-to-b from-white via-white/80 to-white/30 bg-clip-text text-transparent drop-shadow-[0_2px_5px_rgba(255,255,255,0.15)]",
                               isScrolled ? "text-sm xs:text-base sm:text-xl" : "text-lg xs:text-xl sm:text-4xl"
                             )}>
                                 <span className="mx-0.5">.</span>
@@ -1611,9 +1624,9 @@ function App() {
                     key={index}
                     className={cn(
                       "ios-card group relative transition-all duration-500 hover:scale-[1.02]",
-                      insight.type === 'success' ? (theme === 'light' ? "bg-green-500/15 border-green-500/30" : "bg-green-500/[0.03] border-green-500/10 hover:bg-green-500/[0.05]") :
-                      insight.type === 'warning' ? (theme === 'light' ? "bg-red-500/15 border-red-500/30" : "bg-red-500/[0.03] border-red-500/10 hover:bg-red-500/[0.05]") :
-                      (theme === 'light' ? "bg-blue-500/15 border-blue-500/30" : "bg-blue-500/[0.03] border-blue-500/10 hover:bg-blue-500/[0.05]")
+                      insight.type === 'success' ? (theme === 'light' ? "bg-green-500/15 border-green-500/30" : "bg-green-500/[0.06] border-green-500/10 hover:bg-green-500/[0.05]") :
+                      insight.type === 'warning' ? (theme === 'light' ? "bg-red-500/15 border-red-500/30" : "bg-red-500/[0.06] border-red-500/10 hover:bg-red-500/[0.05]") :
+                      (theme === 'light' ? "bg-blue-500/15 border-blue-500/30" : "bg-blue-500/[0.06] border-blue-500/10 hover:bg-blue-500/[0.05]")
                     )}
                   >
                     <div className="flex items-start justify-between mb-4">
@@ -1630,7 +1643,7 @@ function App() {
                       </div>
                       <div className={cn(
                         "flex items-center gap-1.5 px-3 py-1 rounded-full border",
-                        theme === 'light' ? "bg-white/40 border-black/10 shadow-sm" : "bg-white/[0.03] border-white/[0.05]"
+                        theme === 'light' ? "bg-white/40 border-black/10 shadow-sm" : "bg-white/[0.06] border-white/[0.05]"
                       )}>
                         <Sparkles className={cn("w-2.5 h-2.5", theme === 'light' ? "text-slate-900/60" : "text-white/40")} />
                         <span className={cn("text-[9px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-900/40" : "text-white/20")}>Insight</span>
@@ -1644,7 +1657,7 @@ function App() {
                       </p>
                     </div>
 
-                    <div className={cn("absolute -bottom-4 -right-4 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity", theme === 'light' ? "text-slate-900" : "text-white")}>
+                    <div className={cn("absolute -bottom-4 -right-4 opacity-[0.05] group-hover:opacity-[0.05] transition-opacity", theme === 'light' ? "text-slate-900" : "text-white")}>
                       {insight.icon === 'TrendingUp' && <TrendingUp className="w-24 h-24" />}
                       {insight.icon === 'AlertTriangle' && <AlertTriangle className="w-24 h-24" />}
                       {insight.icon === 'Clock' && <Clock className="w-24 h-24" />}
@@ -1676,7 +1689,7 @@ function App() {
                     </span>
                   </div>
                   
-                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.02]")}>
+                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.05]")}>
                     <div 
                       className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500/40 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all duration-1000 ease-out"
                       style={{ width: `${targetProgress.weekly.percentage}%` }}
@@ -1707,7 +1720,7 @@ function App() {
                     </span>
                   </div>
                   
-                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.02]")}>
+                  <div className={cn("relative h-2 w-full rounded-full overflow-hidden", theme === 'light' ? "bg-black/[0.05]" : "bg-white/[0.05]")}>
                     <div 
                       className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/40 to-primary shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-1000 ease-out"
                       style={{ width: `${targetProgress.monthly.percentage}%` }}
@@ -1726,7 +1739,7 @@ function App() {
               <div className="flex flex-col items-center justify-center mb-4">
                 <div className={cn(
                   "inline-flex items-center gap-2.5 px-6 py-2 border rounded-full shadow-2xl",
-                  theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+                  theme === 'light' ? "bg-black/[0.05] border-black/[0.05]" : "bg-white/[0.05] backdrop-blur-md border border-white/[0.05]"
                 )}>
                   <div className={cn("w-1.5 h-1.5 rounded-full", theme === 'light' ? "bg-black/20" : "bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.1)]")} />
                   <p className={cn("text-[11px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Operation Stream</p>
@@ -1738,8 +1751,8 @@ function App() {
                   <div 
                     key={record.id} 
                     className={cn(
-                      "ios-card flex items-center gap-5 p-5 transition-all group shadow-xl !rounded-[2rem]",
-                      theme === 'light' ? "bg-white/40 hover:bg-white/60" : "bg-white/[0.02] hover:bg-white/[0.04]"
+                      "ios-card flex items-center gap-5 p-5 transition-all group shadow-xl overflow-visible",
+                      theme === 'light' ? "bg-white/40 hover:bg-white/60" : "bg-white/[0.05] hover:bg-white/[0.04]"
                     )}
                   >
                     <div className={cn(
@@ -1793,12 +1806,12 @@ function App() {
                 ))}
                 {records.length === 0 && (
                   <div className={cn(
-                    "py-20 flex flex-col items-center justify-center border rounded-[2rem] shadow-2xl",
-                    theme === 'light' ? "bg-white/40 border-white/50" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+                    "py-20 flex flex-col items-center justify-center border ios-card overflow-visible shadow-2xl",
+                    theme === 'light' ? "bg-white/40 border-white/50" : "bg-white/[0.05] backdrop-blur-md border border-white/[0.05]"
                   )}>
                     <div className={cn(
                       "w-16 h-16 rounded-full flex items-center justify-center mb-6 border",
-                      theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] border-white/[0.05]"
+                      theme === 'light' ? "bg-black/[0.05] border-black/[0.05]" : "bg-white/[0.05] border-white/[0.05]"
                     )}>
                       <div className={cn("w-6 h-6 flex items-center justify-center", theme === 'light' ? "text-slate-900/10" : "text-white/10")}>
                         <div className={cn("w-4 h-4 border-2 rounded-full", theme === 'light' ? "border-black/20" : "border-white/20")} />
@@ -1926,7 +1939,7 @@ function App() {
               )}>
                 <div className={cn(
                   "inline-flex items-center gap-2.5 px-6 py-2 border rounded-full shadow-2xl",
-                  theme === 'light' ? "bg-black/[0.02] border-black/[0.05]" : "bg-white/[0.02] backdrop-blur-md border border-white/[0.05]"
+                  theme === 'light' ? "bg-black/[0.05] border-black/[0.05]" : "bg-white/[0.05] backdrop-blur-md border border-white/[0.05]"
                 )}>
                   <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_12px_rgba(59,130,245,0.6)] animate-pulse" />
                   <p className={cn("text-[11px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-900/30" : "text-white/30")}>Trade Report</p>
@@ -1938,11 +1951,7 @@ function App() {
                   "px-2 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]",
                   isScrolled ? "scale-[0.92] sm:scale-[0.95]" : "scale-100"
                 )}>
-                  <div className={cn(
-                    "ios-card !rounded-[2rem] p-2 sm:p-3 shadow-2xl transition-all duration-700",
-                    theme === 'light' ? "bg-white/40" : "bg-white/[0.02]",
-                    isScrolled ? "h-auto" : "h-auto"
-                  )}>
+                  <div className="ios-card overflow-visible p-2 sm:p-3 shadow-2xl transition-all duration-700">
                     <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
                       {/* Status Filters - Segmented Style */}
                       <div className={cn(
@@ -2015,10 +2024,7 @@ function App() {
                             setReportSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
                             haptic('light');
                           }}
-                          className={cn(
-                            "flex-1 lg:flex-none flex items-center gap-3 px-5 py-3 border rounded-2xl transition-all group",
-                            theme === 'light' ? "bg-black/[0.02] border-black/[0.05] hover:bg-black/[0.05]" : "bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.05]"
-                          )}
+                          className="flex-1 lg:flex-none flex items-center gap-3 px-5 py-3 ios-card-mini overflow-visible transition-all group"
                         >
                           <div className="w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
                             {reportSortOrder === 'desc' ? (
@@ -2043,10 +2049,7 @@ function App() {
                               reportFilterInputRef.current?.click();
                             }
                           }}
-                          className={cn(
-                            "flex-1 lg:flex-none relative group flex items-center gap-3 px-5 py-3 rounded-2xl transition-all cursor-pointer",
-                            theme === 'light' ? "bg-white/40 border border-white/50 hover:bg-white/60" : "bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05]"
-                          )}
+                          className="flex-1 lg:flex-none relative group flex items-center gap-3 px-5 py-3 ios-card-mini overflow-visible transition-all cursor-pointer"
                         >
                           <div className="w-5 h-5 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
                             <Calendar className="w-3 h-3 text-amber-500" />
@@ -2090,7 +2093,7 @@ function App() {
             {combinedItems.length === 0 ? (
               <div className={cn(
                 "ios-card flex flex-col items-center justify-center py-20 border-dashed",
-                theme === 'light' ? "bg-white/30" : "bg-white/[0.01]"
+                theme === 'light' ? "bg-white/30" : "bg-white/[0.05]"
               )}>
                 <FileSpreadsheet className={cn("w-16 h-16 mb-4", theme === 'light' ? "text-slate-300" : "text-white/5")} />
                 <p className={cn("font-black uppercase tracking-widest text-[10px]", theme === 'light' ? "text-slate-400" : "text-white/20")}>No activity found</p>
@@ -2123,7 +2126,7 @@ function App() {
                         item.type === 'trade' ? (
                           <div key={i} className={cn(
                             "ios-card-mini group relative transition-all duration-300",
-                            theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.04]"
+                            theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.05] hover:bg-white/[0.04]"
                           )}>
                             <div className="flex justify-between items-start mb-2 sm:mb-3">
                               <div className={cn(
@@ -2153,7 +2156,7 @@ function App() {
                               </div>
                             </div>
 
-                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-slate-100" : "border-white/[0.03]")}>
+                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-slate-100" : "border-white/[0.06]")}>
                               <span className={cn("text-[8px] sm:text-[9px] font-bold tracking-tighter", theme === 'light' ? "text-slate-300" : "text-white/20")}>#{item.data.positionId.slice(-6)}</span>
                               <div className={cn("flex items-center gap-1 sm:gap-1.5", theme === 'light' ? "text-slate-400" : "text-white/30")}>
                                 <Clock className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
@@ -2164,7 +2167,7 @@ function App() {
                         ) : (
                           <div key={i} className={cn(
                             "ios-card-mini group relative transition-all duration-300",
-                            theme === 'light' ? "bg-amber-500/15 hover:bg-amber-500/20" : "bg-white/[0.02] hover:bg-white/[0.04]"
+                            theme === 'light' ? "bg-amber-500/15 hover:bg-amber-500/20" : "bg-white/[0.05] hover:bg-white/[0.04]"
                           )}>
                             <div className="flex justify-between items-start mb-2 sm:mb-3">
                               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center relative">
@@ -2196,7 +2199,7 @@ function App() {
                               </div>
                             </div>
 
-                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-amber-500/10" : "border-white/[0.03]")}>
+                            <div className={cn("mt-3 sm:mt-4 pt-2 sm:pt-3 border-t flex items-center justify-between", theme === 'light' ? "border-amber-500/10" : "border-white/[0.06]")}>
                               <span className={cn("text-[8px] sm:text-[9px] font-bold tracking-tighter truncate max-w-[60%]", theme === 'light' ? "text-slate-300" : "text-white/20")}>{item.data.notes || 'No notes'}</span>
                               <div className={cn("flex items-center gap-1 sm:gap-1.5", theme === 'light' ? "text-slate-400" : "text-white/30")}>
                                 <Clock className="w-2 sm:w-2.5 h-2 sm:h-2.5" />
@@ -2240,8 +2243,8 @@ function App() {
                 isScrolled ? "opacity-0 h-0 overflow-hidden mb-0 scale-90" : "opacity-100 h-auto mb-8 scale-100"
               )}>
                 <div className={cn(
-                  "w-16 h-16 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group transition-all duration-700",
-                  theme === 'light' ? "bg-white/60 border border-white/50 shadow-lg" : "bg-white/[0.03] border border-white/10",
+                  "w-16 h-16 ios-card-mini overflow-visible p-0 flex items-center justify-center mb-4 backdrop-blur-xl shadow-2xl relative group transition-all duration-700",
+                  theme === 'light' ? "bg-white/60 border border-white/50 shadow-lg" : "bg-white/[0.06] border border-white/10",
                   isScrolled ? "w-12 h-12 mb-2" : "w-16 h-16 mb-4"
                 )}>
                   <div className="absolute inset-0 bg-primary/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -2267,304 +2270,269 @@ function App() {
               </div>
             </div>
 
-            <div className={cn(
-              "space-y-8 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
-            )}>
+            <div className="space-y-8 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]">
               {/* Profile & Cloud Section */}
-              <div className={cn(
-                "ios-card transition-all duration-300",
-                theme === 'light' ? "bg-white/60" : "bg-white/[0.02]"
-              )}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className={cn(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center border overflow-hidden shrink-0",
-                    theme === 'light' ? "bg-white/40 border-white/60" : "bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-white/10"
-                  )}>
-                    {user ? (
-                      (() => {
-                        const photoURL = user.photoURL || user.providerData?.[0]?.photoURL;
-                        if (photoURL && !profileImgError) {
+              <div className="ios-card overflow-visible p-4 sm:p-6 shadow-2xl transition-all duration-700">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-14 h-14 ios-card-mini p-0 overflow-visible flex items-center justify-center border shrink-0",
+                      theme === 'light' ? "bg-white/40 border-white/60" : "bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-white/10"
+                    )}>
+                      {user ? (
+                        (() => {
+                          const photoURL = user.photoURL || user.providerData?.[0]?.photoURL;
+                          if (photoURL && !profileImgError) {
+                            return (
+                              <img 
+                                src={photoURL} 
+                                alt={user.displayName || ''} 
+                                className="w-full h-full object-cover rounded-[inherit]" 
+                                onError={(e) => {
+                                  console.error("Profile image failed to load:", photoURL);
+                                  setProfileImgError(true);
+                                }}
+                              />
+                            );
+                          }
                           return (
-                            <img 
-                              src={photoURL} 
-                              alt={user.displayName || ''} 
-                              className="w-full h-full object-cover" 
-                              onError={(e) => {
-                                console.error("Profile image failed to load:", photoURL);
-                                setProfileImgError(true);
-                              }}
-                            />
+                            <div className="w-full h-full flex items-center justify-center bg-indigo-500/10 rounded-[inherit]">
+                              <UserCircle className="w-8 h-8 text-indigo-400" />
+                            </div>
                           );
-                        }
-                        return (
-                          <div className="w-full h-full flex items-center justify-center bg-indigo-500/10">
-                            <UserCircle className="w-8 h-8 text-indigo-400" />
-                          </div>
-                        );
-                      })()
+                        })()
+                      ) : (
+                        <Cloud className="w-7 h-7 text-indigo-400" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className="w-1 h-1 rounded-full bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.3)]" />
+                        <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Identity</p>
+                      </div>
+                      <h3 className={cn("text-sm font-black uppercase tracking-wider truncate", theme === 'light' ? "text-slate-800" : "text-white")}>
+                        {user ? (
+                          <>
+                            {user.displayName?.split(' ')[0]} <span className="text-indigo-500/50">{user.displayName?.split(' ').slice(1).join(' ') || 'Profile'}</span>
+                          </>
+                        ) : (
+                          <>Cloud <span className="text-indigo-500/50">Identity</span></>
+                        )}
+                      </h3>
+                      <p className={cn("text-[10px] font-bold uppercase tracking-widest truncate", theme === 'light' ? "text-slate-400" : "text-white/30")}>{user ? user.email : 'Not Synchronized'}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { user ? handleSignOut() : handleGoogleSignIn(); haptic('medium'); }}
+                    className={cn(
+                      "w-full sm:w-auto px-6 py-3.5 ios-card-mini overflow-visible text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+                      user ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-primary text-black"
+                    )}
+                  >
+                    {user ? 'Sign Out' : 'Connect Account'}
+                  </button>
+                </div>
+
+                {user && (
+                  <button 
+                    onClick={() => { handleManualSync(); haptic('medium'); }}
+                    className="w-full py-4 ios-card-mini overflow-visible flex items-center justify-center gap-3 group active:scale-[0.98] transition-all backdrop-blur-xl"
+                  >
+                    <RefreshCcw className={cn("w-4 h-4 text-emerald-400", isSyncing && "animate-spin")} />
+                    <span className={cn(
+                      "text-[10px] font-black uppercase tracking-widest group-hover:text-emerald-400 transition-colors",
+                      theme === 'light' ? "text-slate-500" : "text-white/60"
+                    )}>
+                      {isSyncing ? 'Synchronizing Data...' : 'Manual Cloud Sync'}
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              {/* Main Settings Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Capital Card */}
+                <button 
+                  onClick={() => { setIsEditingInitial(true); haptic('medium'); }}
+                  className="ios-card overflow-visible group flex flex-col items-start gap-4 transition-all active:scale-95 text-left"
+                >
+                  <div className="w-12 h-12 bg-emerald-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <Wallet className="w-6 h-6 text-emerald-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500/40 shadow-[0_0_5px_rgba(16,185,129,0.3)]" />
+                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ledger</p>
+                    </div>
+                    <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Capital <span className="text-emerald-500/50">Base</span></h4>
+                  </div>
+                </button>
+
+                {/* Security Card */}
+                <button 
+                  onClick={() => { setIsChangingPass(true); haptic('medium'); }}
+                  className="ios-card overflow-visible group flex flex-col items-start gap-4 transition-all active:scale-95 text-left"
+                >
+                  <div className="w-12 h-12 bg-amber-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
+                    <Lock className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.3)]" />
+                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Access</p>
+                    </div>
+                    <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Security <span className="text-amber-500/50">Hub</span></h4>
+                  </div>
+                </button>
+
+                {/* Targets Card */}
+                <button 
+                  onClick={() => { setIsEditingTargets(true); haptic('medium'); }}
+                  className="ios-card overflow-visible group flex flex-col items-start gap-4 transition-all active:scale-95 text-left"
+                >
+                  <div className="w-12 h-12 bg-blue-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
+                    <Trophy className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1 h-1 rounded-full bg-blue-500/40 shadow-[0_0_5px_rgba(59,130,246,0.3)]" />
+                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ambition</p>
+                    </div>
+                    <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Profit <span className="text-blue-500/50">Goals</span></h4>
+                  </div>
+                </button>
+
+                {/* Notifications Card */}
+                <button 
+                  onClick={() => { requestNotificationPermission(); haptic('medium'); }}
+                  className="ios-card overflow-visible group flex flex-col items-start gap-4 transition-all active:scale-95 text-left"
+                >
+                  <div className={cn(
+                    "w-12 h-12 ios-card-mini p-0 overflow-visible flex items-center justify-center border group-hover:scale-110 transition-transform",
+                    notificationsEnabled ? "bg-green-500/10 border-green-500/20" : "bg-primary/10 border-primary/20"
+                  )}>
+                    {notificationsEnabled ? (
+                      <Bell className="w-6 h-6 text-green-500" />
                     ) : (
-                      <Cloud className="w-7 h-7 text-indigo-400" />
+                      <BellOff className="w-6 h-6 text-primary" />
                     )}
                   </div>
-                  <div className="min-w-0">
+                  <div>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <div className="w-1 h-1 rounded-full bg-indigo-500/40 shadow-[0_0_5px_rgba(99,102,241,0.3)]" />
-                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Identity</p>
+                      <div className={cn(
+                        "w-1 h-1 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.2)]",
+                        notificationsEnabled ? "bg-green-500/40" : "bg-primary/40"
+                      )} />
+                      <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Alerts</p>
                     </div>
-                    <h3 className={cn("text-sm font-black uppercase tracking-wider truncate", theme === 'light' ? "text-slate-800" : "text-white")}>
-                      {user ? (
-                        <>
-                          {user.displayName?.split(' ')[0]} <span className="text-indigo-500/50">{user.displayName?.split(' ').slice(1).join(' ') || 'Profile'}</span>
-                        </>
-                      ) : (
-                        <>Cloud <span className="text-indigo-500/50">Identity</span></>
-                      )}
-                    </h3>
-                    <p className={cn("text-[10px] font-bold uppercase tracking-widest truncate", theme === 'light' ? "text-slate-400" : "text-white/30")}>{user ? user.email : 'Not Synchronized'}</p>
+                    <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>System <span className={cn(notificationsEnabled ? "text-green-500/50" : "text-primary/50")}>Status</span></h4>
                   </div>
-                </div>
-                <button 
-                  onClick={() => { user ? handleSignOut() : handleGoogleSignIn(); haptic('medium'); }}
-                  className={cn(
-                    "w-full sm:w-auto px-6 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
-                    user ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-primary text-black"
-                  )}
-                >
-                  {user ? 'Sign Out' : 'Connect Account'}
                 </button>
               </div>
 
-              {user && (
+              {/* Data Management Section */}
+              <div className="grid grid-cols-2 gap-4">
                 <button 
-                  onClick={() => { handleManualSync(); haptic('medium'); }}
-                  className={cn(
-                  "w-full py-4 rounded-2xl flex items-center justify-center gap-3 group active:scale-[0.98] transition-all backdrop-blur-xl",
-                  theme === 'light' ? "bg-white/40 border border-white/60 shadow-sm" : "bg-white/[0.03] border border-white/[0.05]"
-                )}
+                  onClick={() => { handleExportJSON(); haptic('medium'); }}
+                  className="ios-card-mini overflow-visible flex items-center gap-3 group transition-all active:scale-95"
                 >
-                  <RefreshCcw className={cn("w-4 h-4 text-emerald-400", isSyncing && "animate-spin")} />
-                  <span className={cn(
-                    "text-[10px] font-black uppercase tracking-widest group-hover:text-emerald-400 transition-colors",
-                    theme === 'light' ? "text-slate-500" : "text-white/60"
-                  )}>
-                    {isSyncing ? 'Synchronizing Data...' : 'Manual Cloud Sync'}
-                  </span>
+                  <Download className={cn("w-4 h-4 group-hover:text-blue-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
+                  <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Backup</span>
                 </button>
-              )}
-            </div>
 
-            {/* Main Settings Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Capital Card */}
-              <button 
-                onClick={() => { setIsEditingInitial(true); haptic('medium'); }}
-                className={cn(
-                  "ios-card group flex flex-col items-start gap-4 transition-all active:scale-95 text-left",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                  <Wallet className="w-6 h-6 text-emerald-500" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className="w-1 h-1 rounded-full bg-emerald-500/40 shadow-[0_0_5px_rgba(16,185,129,0.3)]" />
-                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ledger</p>
-                  </div>
-                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Capital <span className="text-emerald-500/50">Base</span></h4>
-                </div>
-              </button>
+                <label className="ios-card-mini overflow-visible flex items-center gap-3 group transition-all active:scale-95 cursor-pointer">
+                  <Upload className={cn("w-4 h-4 group-hover:text-purple-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
+                  <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Restore</span>
+                  <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
+                </label>
+              </div>
 
-              {/* Security Card */}
-              <button 
-                onClick={() => { setIsChangingPass(true); haptic('medium'); }}
-                className={cn(
-                  "ios-card group flex flex-col items-start gap-4 transition-all active:scale-95 text-left",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
-                  <Lock className="w-6 h-6 text-amber-500" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.3)]" />
-                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Access</p>
-                  </div>
-                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Security <span className="text-amber-500/50">Hub</span></h4>
-                </div>
-              </button>
-
-              {/* Targets Card */}
-              <button 
-                onClick={() => { setIsEditingTargets(true); haptic('medium'); }}
-                className={cn(
-                  "ios-card group flex flex-col items-start gap-4 transition-all active:scale-95 text-left",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-transform">
-                  <Trophy className="w-6 h-6 text-blue-500" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className="w-1 h-1 rounded-full bg-blue-500/40 shadow-[0_0_5px_rgba(59,130,246,0.3)]" />
-                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Ambition</p>
-                  </div>
-                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>Profit <span className="text-blue-500/50">Goals</span></h4>
-                </div>
-              </button>
-
-              {/* Notifications Card */}
-              <button 
-                onClick={() => { requestNotificationPermission(); haptic('medium'); }}
-                className={cn(
-                  "ios-card group flex flex-col items-start gap-4 transition-all active:scale-95 text-left",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center border group-hover:scale-110 transition-transform",
-                  notificationsEnabled ? "bg-green-500/10 border-green-500/20" : "bg-primary/10 border-primary/20"
-                )}>
-                  {notificationsEnabled ? (
-                    <Bell className="w-6 h-6 text-green-500" />
-                  ) : (
-                    <BellOff className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className={cn(
-                      "w-1 h-1 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.2)]",
-                      notificationsEnabled ? "bg-green-500/40" : "bg-primary/40"
-                    )} />
-                    <p className={cn("text-[8px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Alerts</p>
-                  </div>
-                  <h4 className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white")}>System <span className={cn(notificationsEnabled ? "text-green-500/50" : "text-primary/50")}>Status</span></h4>
-                </div>
-              </button>
-            </div>
-
-            {/* Data Management Section */}
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => { handleExportJSON(); haptic('medium'); }}
-                className={cn(
-                  "ios-card flex items-center gap-3 group transition-all active:scale-95",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <Download className={cn("w-4 h-4 group-hover:text-blue-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
-                <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Backup</span>
-              </button>
-
-              <label className={cn(
-                "ios-card flex items-center gap-3 group transition-all active:scale-95 cursor-pointer",
-                theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-              )}>
-                <Upload className={cn("w-4 h-4 group-hover:text-purple-400 transition-colors", theme === 'light' ? "text-slate-400" : "text-white/40")} />
-                <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-500" : "text-white/60")}>Restore</span>
-                <input type="file" className="hidden" accept=".json" onChange={handleImportJSON} />
-              </label>
-            </div>
-
-            {/* Danger Zone Section */}
-            <div className="space-y-3">
-              <button 
-                onClick={() => { setShowAbout(true); haptic('medium'); }}
-                className={cn(
-                  "ios-card w-full flex items-center justify-between group transition-all active:scale-[0.99]",
-                  theme === 'light' ? "bg-white/60 hover:bg-white/80" : "bg-white/[0.02] hover:bg-white/[0.05]"
-                )}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
-                    <Info className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 mb-0.5">
-                      <div className="w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_5px_rgba(212,175,55,0.2)]" />
-                      <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Information</p>
-                    </div>
-                    <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white/70")}>About <span className="text-primary/50">Fox Trade</span></span>
-                  </div>
-                </div>
-                <Sparkles className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
-              </button>
-
-              <div className={cn(
-                "ios-card w-full flex flex-col gap-4",
-                theme === 'light' ? "bg-amber-500/10 hover:bg-amber-500/15" : "bg-amber-500/[0.03] hover:bg-amber-500/[0.05]"
-              )}>
-                <div className="flex items-center justify-between">
+              {/* Danger Zone Section */}
+              <div className="space-y-3">
+                <button 
+                  onClick={() => { setShowAbout(true); haptic('medium'); }}
+                  className="ios-card overflow-visible w-full flex items-center justify-between group transition-all active:scale-[0.99]"
+                >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
-                      <FileText className="w-5 h-5 text-amber-500" />
+                    <div className="w-10 h-10 bg-primary/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-primary/20">
+                      <Info className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <div className="flex items-center gap-1 mb-0.5">
-                        <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.2)]" />
-                        <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-amber-600" : "text-white/10")}>Selective Wipe</p>
+                        <div className="w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_5px_rgba(212,175,55,0.2)]" />
+                        <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-slate-400" : "text-white/10")}>Information</p>
                       </div>
-                      <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-amber-700" : "text-amber-500/70")}>Delete <span className="text-amber-500/50">By Date</span></span>
+                      <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-slate-800" : "text-white/70")}>About <span className="text-primary/50">Fox Trade</span></span>
                     </div>
                   </div>
-                  
-                  <div 
-                    onClick={() => {
-                      haptic('light');
-                      try {
-                        // @ts-ignore
-                        reportDeleteInputRef.current?.showPicker();
-                      } catch (e) {
-                        reportDeleteInputRef.current?.click();
-                      }
+                  <Sparkles className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
+                </button>
+
+                <div className="ios-card overflow-visible w-full flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-amber-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-amber-500/20">
+                        <FileText className="w-5 h-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <div className="w-1 h-1 rounded-full bg-amber-500/40 shadow-[0_0_5px_rgba(245,158,11,0.2)]" />
+                          <p className={cn("text-[7px] font-black uppercase tracking-[0.2em]", theme === 'light' ? "text-amber-600" : "text-white/10")}>Selective Wipe</p>
+                        </div>
+                        <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-amber-700" : "text-amber-500/70")}>Delete <span className="text-amber-500/50">By Date</span></span>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      onClick={() => {
+                        haptic('light');
+                        try {
+                          // @ts-ignore
+                          reportDeleteInputRef.current?.showPicker();
+                        } catch (e) {
+                          reportDeleteInputRef.current?.click();
+                        }
+                      }}
+                      className="relative group flex items-center gap-2 px-3 py-2 ios-card-mini overflow-visible transition-all cursor-pointer"
+                    >
+                      <Calendar className="w-3 h-3 text-amber-500/60" />
+                      <input 
+                        ref={reportDeleteInputRef}
+                        type="date" 
+                        value={reportDeleteDate}
+                        onChange={(e) => {
+                          setReportDeleteDate(e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          "bg-transparent text-[9px] font-black uppercase tracking-widest outline-none cursor-pointer w-24",
+                          theme === 'light' ? "text-slate-600 [color-scheme:light]" : "text-white/60 [color-scheme:dark]"
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    disabled={!reportDeleteDate}
+                    onClick={() => { 
+                      haptic('heavy'); 
+                      setConfirmAction({
+                        type: 'reset_reports_date',
+                        title: 'Delete Reports',
+                        message: `Are you sure you want to delete MT5 reports for ${reportDeleteDate}?`
+                      });
                     }}
                     className={cn(
-                      "relative group flex items-center gap-2 px-3 py-2 rounded-xl border transition-all cursor-pointer",
-                      theme === 'light' ? "bg-white/40 border-black/5 hover:bg-white/60" : "bg-white/[0.02] border-white/5 hover:bg-white/[0.05]"
+                      "w-full py-3 ios-card-mini overflow-visible text-[9px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2",
+                      reportDeleteDate 
+                        ? (theme === 'light' ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-amber-500/20 text-amber-500 border border-amber-500/30 hover:bg-amber-500/30")
+                        : (theme === 'light' ? "bg-slate-100 text-slate-300 cursor-not-allowed" : "bg-white/[0.05] text-white/10 cursor-not-allowed border border-white/[0.05]")
                     )}
                   >
-                    <Calendar className="w-3 h-3 text-amber-500/60" />
-                    <input 
-                      ref={reportDeleteInputRef}
-                      type="date" 
-                      value={reportDeleteDate}
-                      onChange={(e) => {
-                        setReportDeleteDate(e.target.value);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className={cn(
-                        "bg-transparent text-[9px] font-black uppercase tracking-widest outline-none cursor-pointer w-24",
-                        theme === 'light' ? "text-slate-600 [color-scheme:light]" : "text-white/60 [color-scheme:dark]"
-                      )}
-                    />
-                  </div>
+                    <Trash2 className="w-3 h-3" />
+                    Clear Selected Date
+                  </button>
                 </div>
-
-                <button 
-                  disabled={!reportDeleteDate}
-                  onClick={() => { 
-                    haptic('heavy'); 
-                    setConfirmAction({
-                      type: 'reset_reports_date',
-                      title: 'Delete Reports',
-                      message: `Are you sure you want to delete MT5 reports for ${reportDeleteDate}?`
-                    });
-                  }}
-                  className={cn(
-                    "w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg",
-                    reportDeleteDate 
-                      ? (theme === 'light' ? "bg-amber-500 text-white shadow-amber-500/20" : "bg-amber-500/20 text-amber-500 border border-amber-500/30 hover:bg-amber-500/30 shadow-amber-500/10")
-                      : (theme === 'light' ? "bg-slate-100 text-slate-300 cursor-not-allowed" : "bg-white/[0.02] text-white/10 cursor-not-allowed border border-white/[0.02]")
-                  )}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Clear Selected Date
-                </button>
-              </div>
 
               <button 
                 onClick={() => { 
@@ -2581,7 +2549,7 @@ function App() {
                 )}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                  <div className="w-10 h-10 bg-amber-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-amber-500/20">
                     <FileText className="w-5 h-5 text-amber-500" />
                   </div>
                   <div>
@@ -2610,7 +2578,7 @@ function App() {
                 )}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20">
+                  <div className="w-10 h-10 bg-red-500/10 ios-card-mini overflow-visible p-0 flex items-center justify-center border border-red-500/20">
                     <Trash2 className="w-5 h-5 text-red-500" />
                   </div>
                   <div>
@@ -2634,12 +2602,12 @@ function App() {
                   });
                 }}
                 className={cn(
-                  "ios-card w-full flex items-center justify-between group transition-all active:scale-[0.99]",
+                  "ios-card overflow-visible w-full flex items-center justify-between group transition-all active:scale-[0.99]",
                   theme === 'light' ? "bg-sky-500/15 hover:bg-sky-500/20" : "bg-sky-500/[0.05] hover:bg-sky-500/10"
                 )}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-sky-500/10 rounded-xl flex items-center justify-center border border-sky-500/20">
+                  <div className="w-10 h-10 bg-sky-500/10 ios-card-mini overflow-visible flex items-center justify-center border border-sky-500/20">
                     <RotateCcw className="w-5 h-5 text-sky-500" />
                   </div>
                   <span className={cn("text-xs font-black uppercase tracking-widest", theme === 'light' ? "text-sky-600" : "text-sky-500/70")}>Force Update</span>
@@ -2656,16 +2624,32 @@ function App() {
 
             {/* Modals follow below as they are state-driven */}
             {showAbout && (
-              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-500">
-                <div className="relative w-full max-w-sm bg-[#0A0A0C] border border-white/[0.05] rounded-[2.5rem] p-10 shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 animate-in fade-in duration-500">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setShowAbout(false)} />
+                <div className={cn(
+                  "relative w-full max-w-sm backdrop-blur-[50px] border-none rounded-[2.5rem] p-10 animate-in zoom-in duration-300 shadow-2xl overflow-hidden",
+                  theme === 'light' ? "bg-white/80" : "bg-white/[0.05]"
+                )}>
+                  {/* Glass Edge Border Overlay */}
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.5px] border-black/5" : "border-[0.5px] border-white/20",
+                    "shadow-[inset_0_0_1px_rgba(255,255,255,0.1)]"
+                  )} />
+
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
+
                   {/* Background Logo */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-[0.06] pointer-events-none">
                     <img src={logo} alt="MAK GROUP" className="w-[120%] h-[120%] object-contain rotate-[-15deg]" />
                   </div>
 
                   <button 
                     onClick={() => { setShowAbout(false); haptic('light'); }}
-                    className="absolute top-6 right-6 w-10 h-10 bg-white/[0.02] border border-white/[0.05] rounded-full flex items-center justify-center text-white/20 hover:text-white/40 transition-all z-20 active:scale-90"
+                    className={cn(
+                      "absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all z-40 active:scale-90",
+                      theme === 'light' ? "bg-black/5 text-black/20 hover:text-black/40" : "bg-white/[0.05] border border-white/[0.05] text-white/20 hover:text-white/40"
+                    )}
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -2675,17 +2659,17 @@ function App() {
                       <img src={logo} alt="MAK GROUP" className="w-20 h-20 object-contain" />
                     </div>
 
-                    <h3 className="text-2xl font-black text-white mb-2 tracking-tighter text-center uppercase">FOX TRADE</h3>
+                    <h3 className={cn("text-2xl font-black mb-2 tracking-tighter text-center uppercase", theme === 'light' ? "text-slate-900" : "text-white")}>FOX TRADE</h3>
                     <div className="h-1 w-12 bg-primary rounded-full mb-8 shadow-[0_0_15px_rgba(255,184,0,0.4)]" />
 
                     <div className="space-y-6 text-center px-4">
-                      <p className="text-[11px] font-medium text-white/60 lowercase tracking-widest leading-relaxed">
+                      <p className={cn("text-[11px] font-medium lowercase tracking-widest leading-relaxed", theme === 'light' ? "text-slate-600" : "text-white/60")}>
                         all intellectual property rights for this software<br />
                         are exclusively reserved for <span className="text-primary uppercase font-black tracking-normal text-[9px]">MAK GROUP</span>
                       </p>
 
-                      <div className="pt-6 border-t border-white/[0.05]">
-                        <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.5em]">© 2026 Exclusive Rights</p>
+                      <div className={cn("pt-6 border-t", theme === 'light' ? "border-black/5" : "border-white/[0.05]")}>
+                        <p className={cn("text-[8px] font-black uppercase tracking-[0.5em]", theme === 'light' ? "text-slate-400" : "text-white/30")}>© 2026 Exclusive Rights</p>
                       </div>
                     </div>
 
@@ -2702,16 +2686,23 @@ function App() {
 
             {/* Confirmation Modal */}
             {confirmAction && (
-              <div className={cn(
-                "fixed inset-0 z-[110] flex items-center justify-center p-6 backdrop-blur-xl animate-in fade-in duration-300",
-                theme === 'light' ? "bg-white/40" : "bg-black/95"
-              )}>
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 animate-in fade-in duration-300">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setConfirmAction(null)} />
                 <div className={cn(
-                  "w-full max-w-xs border rounded-[2.5rem] p-8 shadow-2xl scale-in-center",
-                  theme === 'light' ? "bg-white border-slate-200" : "bg-[#0A0A0C] border-white/[0.05]"
+                  "relative w-full max-w-xs backdrop-blur-[50px] border-none rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl overflow-hidden",
+                  theme === 'light' ? "bg-white/80" : "bg-white/[0.05]"
                 )}>
+                  {/* Glass Edge Border Overlay */}
                   <div className={cn(
-                    "w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border animate-pulse",
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.5px] border-black/5" : "border-[0.5px] border-white/20",
+                    "shadow-[inset_0_0_1px_rgba(255,255,255,0.1)]"
+                  )} />
+
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
+
+                  <div className={cn(
+                    "relative z-10 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border animate-pulse",
                     confirmAction.type === 'reset' ? "bg-rose-500/10 border-rose-500/20" : 
                     confirmAction.type === 'reset_reports' ? "bg-amber-500/10 border-amber-500/20" :
                     "bg-sky-500/10 border-sky-500/20"
@@ -2722,17 +2713,17 @@ function App() {
                       "text-sky-500"
                     )} />
                   </div>
-                  <h3 className={cn("text-xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>{confirmAction.title}</h3>
-                  <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] mb-8 text-center leading-relaxed px-4", theme === 'light' ? "text-slate-400" : "text-white/50")}>
+                  <h3 className={cn("relative z-10 text-xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>{confirmAction.title}</h3>
+                  <p className={cn("relative z-10 text-[10px] font-black uppercase tracking-[0.2em] mb-8 text-center leading-relaxed px-4", theme === 'light' ? "text-slate-400" : "text-white/50")}>
                     {confirmAction.message}
                   </p>
                   
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="relative z-10 grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => { setConfirmAction(null); haptic('light'); }}
                       className={cn(
                         "p-4 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-colors active:scale-95",
-                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.03] border border-white/[0.05] text-white/60 hover:bg-white/10"
+                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.06] border border-white/[0.05] text-white/60 hover:bg-white/10"
                       )}
                     >
                       Abort
@@ -2769,22 +2760,27 @@ function App() {
 
             {/* Password Change Modal */}
             {isChangingPass && (
-              <div className={cn(
-                "fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-md animate-in fade-in duration-300",
-                theme === 'light' ? "bg-white/40" : "bg-black/90"
-              )}>
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsChangingPass(false)} />
                 <div className={cn(
-                  "w-full max-w-sm border rounded-[2rem] p-10 shadow-2xl scale-in-center",
-                  theme === 'light' ? "bg-white border-slate-200" : "bg-[#0A0A0C] border-white/[0.05]"
+                  "relative w-full max-w-sm backdrop-blur-[50px] border-none rounded-[2.5rem] p-10 shadow-2xl overflow-hidden",
+                  theme === 'light' ? "bg-white/80" : "bg-white/[0.05]"
                 )}>
+                  {/* Glass Edge Border Overlay */}
                   <div className={cn(
-                    "w-16 h-16 border rounded-3xl flex items-center justify-center mx-auto mb-8",
-                    theme === 'light' ? "bg-slate-50 border-slate-100" : "bg-white/[0.02] border border-white/[0.05]"
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.5px] border-black/5" : "border-[0.5px] border-white/20",
+                    "shadow-[inset_0_0_1px_rgba(255,255,255,0.1)]"
+                  )} />
+
+                  <div className={cn(
+                    "relative z-10 w-16 h-16 border rounded-3xl flex items-center justify-center mx-auto mb-8",
+                    theme === 'light' ? "bg-slate-50 border-slate-100" : "bg-white/[0.05] border border-white/[0.05]"
                   )}>
                     <Lock className="w-8 h-8 text-primary/60" />
                   </div>
-                  <h3 className={cn("text-2xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>Security Hub</h3>
-                  <p className={cn("text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-center", theme === 'light' ? "text-slate-400" : "text-white/50")}>Set 4-digit master code</p>
+                  <h3 className={cn("relative z-10 text-2xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>Security Hub</h3>
+                  <p className={cn("relative z-10 text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-center", theme === 'light' ? "text-slate-400" : "text-white/50")}>Set 4-digit master code</p>
                   
                   <input
                     type="password"
@@ -2793,17 +2789,17 @@ function App() {
                     value={newPass}
                     onChange={(e) => setNewPass(e.target.value.replace(/\D/g, ''))}
                     className={cn(
-                      "w-full border rounded-[1.8rem] p-6 text-center text-4xl tracking-[0.5em] font-black focus:outline-none transition-all mb-10",
-                      theme === 'light' ? "bg-slate-50 border-slate-200 text-slate-800 focus:border-primary/40" : "bg-white/[0.01] border border-white/[0.05] text-white focus:border-primary/20"
+                      "relative z-10 w-full border ios-card-mini overflow-visible p-6 text-center text-4xl tracking-[0.5em] font-black focus:outline-none transition-all mb-10",
+                      theme === 'light' ? "bg-slate-50 border-slate-200 text-slate-800 focus:border-primary/40" : "bg-white/[0.05] border border-white/[0.05] text-white focus:border-primary/20"
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="relative z-10 grid grid-cols-2 gap-4">
                     <button 
                       onClick={() => { setIsChangingPass(false); setNewPass(''); haptic('light'); }}
                       className={cn(
                         "p-5 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-colors active:scale-95",
-                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.03] border border-white/[0.05] text-white/60 hover:bg-white/10"
+                        theme === 'light' ? "bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200" : "bg-white/[0.06] border border-white/[0.05] text-white/60 hover:bg-white/10"
                       )}
                     >
                       Abort
@@ -2829,22 +2825,41 @@ function App() {
 
             {/* Targets Editing Modal */}
             {isEditingTargets && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="w-full max-w-sm bg-[#0A0A0C] border border-white/[0.05] rounded-[2rem] p-10 shadow-2xl scale-in-center">
-                  <div className="w-16 h-16 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsEditingTargets(false)} />
+                <div className={cn(
+                  "relative w-full max-w-sm backdrop-blur-[50px] border-none rounded-[2.5rem] p-10 shadow-2xl overflow-hidden",
+                  theme === 'light' ? "bg-white/80" : "bg-white/[0.05]"
+                )}>
+                  {/* Glass Edge Border Overlay */}
+                  <div className={cn(
+                    "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                    theme === 'light' ? "border-[0.5px] border-black/5" : "border-[0.5px] border-white/20",
+                    "shadow-[inset_0_0_1px_rgba(255,255,255,0.1)]"
+                  )} />
+
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
+
+                  <div className={cn(
+                    "relative z-10 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-8",
+                    theme === 'light' ? "bg-slate-50 border-slate-100" : "bg-white/[0.05] border border-white/[0.05]"
+                  )}>
                     <Trophy className="w-8 h-8 text-amber-500/60" />
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-2 tracking-tighter text-center">Profit Targets</h3>
-                  <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-10 text-center leading-relaxed">Set Your Ambitions</p>
+                  <h3 className={cn("relative z-10 text-2xl font-black mb-2 tracking-tighter text-center", theme === 'light' ? "text-slate-800" : "text-white")}>Profit Targets</h3>
+                  <p className={cn("relative z-10 text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-center leading-relaxed", theme === 'light' ? "text-slate-400" : "text-white/20")}>Set Your Ambitions</p>
                   
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.05] rounded-2xl mb-4">
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Show on Home</span>
+                  <div className="relative z-10 space-y-6">
+                    <div className={cn(
+                      "flex items-center justify-between p-4 border rounded-2xl mb-4",
+                      theme === 'light' ? "bg-slate-50 border-slate-100" : "bg-white/[0.05] border border-white/[0.05]"
+                    )}>
+                      <span className={cn("text-[10px] font-black uppercase tracking-widest", theme === 'light' ? "text-slate-400" : "text-white/40")}>Show on Home</span>
                       <button 
                         onClick={() => { setShowTargetsOnHome(!showTargetsOnHome); haptic('light'); }}
                         className={cn(
                           "w-12 h-6 rounded-full transition-all duration-300 relative",
-                          showTargetsOnHome ? "bg-amber-500" : "bg-white/10"
+                          showTargetsOnHome ? "bg-amber-500" : (theme === 'light' ? "bg-slate-200" : "bg-white/10")
                         )}
                       >
                         <div className={cn(
@@ -2855,28 +2870,34 @@ function App() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-2">Weekly Target ($)</label>
+                      <label className={cn("text-[10px] font-black uppercase tracking-[0.2em] ml-2", theme === 'light' ? "text-slate-400" : "text-white/20")}>Weekly Target ($)</label>
                       <input 
                         type="number" 
                         defaultValue={weeklyTarget}
-                        className="w-full bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 text-center text-3xl font-black text-white tracking-tight focus:outline-none focus:border-amber-500/50 transition-all"
+                        className={cn(
+                          "w-full border rounded-2xl p-5 text-center text-3xl font-black tracking-tight focus:outline-none focus:border-amber-500/50 transition-all",
+                          theme === 'light' ? "bg-slate-50 border-slate-100 text-slate-800" : "bg-white/[0.05] border border-white/[0.05] text-white"
+                        )}
                         onChange={(e) => setWeeklyTarget(parseFloat(e.target.value) || 0)}
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] ml-2">Monthly Target ($)</label>
+                      <label className={cn("text-[10px] font-black uppercase tracking-[0.2em] ml-2", theme === 'light' ? "text-slate-400" : "text-white/20")}>Monthly Target ($)</label>
                       <input 
                         type="number" 
                         defaultValue={monthlyTarget}
-                        className="w-full bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 text-center text-3xl font-black text-white tracking-tight focus:outline-none focus:border-amber-500/50 transition-all"
+                        className={cn(
+                          "w-full border rounded-2xl p-5 text-center text-3xl font-black tracking-tight focus:outline-none focus:border-amber-500/50 transition-all",
+                          theme === 'light' ? "bg-slate-50 border-slate-100 text-slate-800" : "bg-white/[0.05] border border-white/[0.05] text-white"
+                        )}
                         onChange={(e) => setMonthlyTarget(parseFloat(e.target.value) || 0)}
                       />
                     </div>
                     
                     <button 
                       onClick={() => { setIsEditingTargets(false); haptic('heavy'); }}
-                      className="w-full p-5 rounded-2xl bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest shadow-xl shadow-amber-500/20 hover:scale-[1.02] active:scale-95 transition-all mt-4"
+                      className="w-full p-5 rounded-2xl bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest shadow-xl shadow-amber-500/20 active:scale-95 transition-all mt-4"
                     >
                       Save Targets
                     </button>
@@ -2915,7 +2936,7 @@ function App() {
         
         {/* Grain/Noise Texture for Premium Feel */}
         <div className={cn(
-          "absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]",
+          "absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]",
           theme === 'light' && "invert"
         )} />
       </div>
@@ -2945,8 +2966,8 @@ function App() {
 
       {/* iOS 26 Tab Bar */}
       <nav className={cn(
-        "fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 backdrop-blur-[40px] border px-2 py-2 flex items-center justify-between shadow-2xl rounded-[2.5rem]",
-        theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.01] border-white/5"
+        "fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 backdrop-blur-[40px] border px-2 py-2 flex items-center justify-between shadow-2xl ios-card overflow-visible",
+        theme === 'light' ? "bg-white/60 border-white/60" : "bg-white/[0.05] border-white/5"
       )}>
         <button onClick={() => { setActiveTab('home'); haptic('light'); }} className="flex-1 flex justify-center group py-1">
           <div className={cn(
@@ -2975,7 +2996,7 @@ function App() {
             onClick={() => { fileInputRef.current?.click(); haptic('medium'); }}
             className={cn(
               "w-16 h-16 sm:w-20 sm:h-20 backdrop-blur-[50px] rounded-[2rem] sm:rounded-[2.5rem] p-3 sm:p-4 border shadow-[0_15px_35px_rgba(0,0,0,0.4)] active:scale-90 transition-all duration-300 flex items-center justify-center group relative overflow-hidden",
-              theme === 'light' ? "bg-white/80 border-white/60" : "bg-white/[0.02] border-white/5"
+              theme === 'light' ? "bg-white/80 border-white/60" : "bg-white/[0.05] border-white/5"
             )}
           >
             <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity", theme === 'light' ? "bg-black/5" : "bg-white/5")} />
@@ -3020,14 +3041,26 @@ function App() {
       {/* MT5 Import Preview Modal */}
       {mt5Preview && (
         <>
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[130] animate-fade-in" onClick={() => setMt5Preview(null)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[140] w-[95%] max-w-lg bg-[#0A0A0C] border border-white/10 rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[130] animate-fade-in" onClick={() => setMt5Preview(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[140] w-[95%] max-w-lg">
+            <div className={cn(
+              "relative w-full backdrop-blur-[50px] border-none rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl overflow-hidden",
+              theme === 'light' ? "bg-white/80" : "bg-white/[0.05]"
+            )}>
+              {/* Glass Edge Border Overlay */}
+              <div className={cn(
+                "absolute inset-0 pointer-events-none rounded-[inherit] z-30 transition-all duration-700",
+                theme === 'light' ? "border-[0.5px] border-black/5" : "border-[0.5px] border-white/20",
+                "shadow-[inset_0_0_1px_rgba(255,255,255,0.1)]"
+              )} />
+
+              <div className="relative z-10">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
             
             <div className="flex flex-col items-center mb-10 pt-4 relative">
               <button 
                 onClick={() => { setMt5Preview(null); haptic('light'); }} 
-                className="absolute -top-2 -right-2 w-8 h-8 bg-white/[0.03] border border-white/[0.05] rounded-full flex items-center justify-center text-white/20 hover:text-white/40 transition-all z-20"
+                className="absolute -top-2 -right-2 w-8 h-8 bg-white/[0.06] border border-white/[0.05] rounded-full flex items-center justify-center text-white/20 hover:text-white/40 transition-all z-20"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -3037,7 +3070,7 @@ function App() {
                 </div>
               
               <div className="flex flex-col items-center">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.02] border border-white/[0.05] rounded-full backdrop-blur-md mb-2">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.05] border border-white/[0.05] rounded-full backdrop-blur-md mb-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
                   <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30">Data Ingestion</p>
                 </div>
@@ -3045,7 +3078,7 @@ function App() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 text-left relative overflow-hidden">
+              <div className="bg-white/[0.05] border border-white/[0.05] rounded-2xl p-5 text-left relative overflow-hidden">
                 <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1 text-left">Trade Performance</p>
                 <div className="flex items-baseline gap-2">
                   <p className="text-2xl font-black text-white">{mt5Preview.tradeCount}</p>
@@ -3062,7 +3095,7 @@ function App() {
                   </div>
                 </div>
               </div>
-              <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 text-left relative overflow-hidden">
+              <div className="bg-white/[0.05] border border-white/[0.05] rounded-2xl p-5 text-left relative overflow-hidden">
                 <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1 text-left">Net Result</p>
                 <p className={cn("text-2xl font-black", mt5Preview.totalProfit >= 0 ? "text-green-500/70" : "text-red-500/70")}>
                   ${mt5Preview.totalProfit.toLocaleString()}
@@ -3075,11 +3108,11 @@ function App() {
             </div>
 
             <div className="flex gap-4 mb-8">
-              <div className="flex-1 px-4 py-2 bg-white/[0.01] border border-white/[0.03] rounded-xl flex items-center justify-between">
+              <div className="flex-1 px-4 py-2 bg-white/[0.05] border border-white/[0.06] rounded-xl flex items-center justify-between">
                 <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">Commission</span>
                 <span className="text-[10px] font-black text-red-500/40">${mt5Preview.totalCommission.toLocaleString()}</span>
               </div>
-              <div className="flex-1 px-4 py-2 bg-white/[0.01] border border-white/[0.03] rounded-xl flex items-center justify-between">
+              <div className="flex-1 px-4 py-2 bg-white/[0.05] border border-white/[0.06] rounded-xl flex items-center justify-between">
                 <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">Swap</span>
                 <span className="text-[10px] font-black text-white/40">${mt5Preview.totalSwap.toLocaleString()}</span>
               </div>
@@ -3090,7 +3123,7 @@ function App() {
               {mt5Preview.trades.slice(0, 3).map((trade, i) => {
                 const netTradeProfit = trade.profit;
                 return (
-                  <div key={i} className="flex items-center justify-between p-4 bg-white/[0.01] border border-white/[0.03] rounded-xl">
+                  <div key={i} className="flex items-center justify-between p-4 bg-white/[0.05] border border-white/[0.06] rounded-xl">
                     <div className="flex items-center gap-4">
                       <div className={cn("w-1 h-8 rounded-full", netTradeProfit >= 0 ? "bg-green-500/30" : "bg-red-500/30")} />
                       <div className="text-left">
@@ -3111,19 +3144,24 @@ function App() {
               })}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => { setMt5Preview(null); haptic('light'); }}
-                className="py-5 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-white/40 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmMT5Import}
-                className="py-5 rounded-2xl bg-primary text-black text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-[0_10px_30px_rgba(255,184,0,0.15)]"
-              >
-                Import All
-              </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => { setMt5Preview(null); haptic('light'); }}
+                    className={cn(
+                      "py-5 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all active:scale-95",
+                      theme === 'light' ? "bg-black/[0.06] border-black/[0.05] text-slate-900/40 hover:bg-black/10" : "bg-white/[0.06] border-white/[0.05] text-white/40 hover:bg-white/10"
+                    )}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => { confirmMT5Import(); haptic('medium'); }}
+                    className="py-5 rounded-2xl bg-primary text-black text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-[0_10px_30px_rgba(255,184,0,0.15)]"
+                  >
+                    Import All
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </>
@@ -3132,9 +3170,10 @@ function App() {
       {/* Geometric Initial Capital Modal */}
       {isEditingInitial && (
         <>
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] animate-fade-in" onClick={() => setIsEditingInitial(false)} />
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[120] w-[90%] max-w-sm bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-10 animate-in zoom-in duration-300 shadow-2xl">
-            <div className="w-16 h-16 bg-white/[0.02] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[110] animate-fade-in" onClick={() => setIsEditingInitial(false)} />
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[120] w-[90%] max-w-sm bg-white/[0.05] backdrop-blur-[30px] border border-white/5 rounded-[2.5rem] p-10 animate-in zoom-in duration-300 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
+            <div className="w-16 h-16 bg-white/[0.05] border border-white/[0.05] rounded-3xl flex items-center justify-center mx-auto mb-6">
               <Wallet className="w-8 h-8 text-white/20" />
             </div>
             <h3 className="text-xl font-black text-center mb-2 text-white tracking-tighter">Portfolio Base</h3>
@@ -3146,7 +3185,7 @@ function App() {
                 type="number" 
                 value={initialCapital} 
                 onChange={(e) => setInitialCapital(parseFloat(e.target.value) || 0)}
-                className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.8rem] p-8 text-center text-4xl font-black text-white outline-none focus:border-primary/20 transition-all"
+                className="w-full bg-white/[0.05] border border-white/[0.05] rounded-[1.8rem] p-8 text-center text-4xl font-black text-white outline-none focus:border-primary/20 transition-all"
                 autoFocus
               />
             </div>
@@ -3165,8 +3204,8 @@ function App() {
       {isAddingWithdrawal && (
         <>
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[110] animate-fade-in" onClick={() => setIsAddingWithdrawal(false)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[120] w-[90%] max-w-sm bg-white/[0.01] backdrop-blur-[30px] border border-white/5 rounded-[2.5rem] p-10 animate-in zoom-in duration-300 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent rounded-[2.5rem] pointer-events-none" />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[120] w-[90%] max-w-sm bg-white/[0.05] backdrop-blur-[30px] border border-white/5 rounded-[2.5rem] p-10 animate-in zoom-in duration-300 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
             <div className="relative z-10">
               <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <LogOut className="w-8 h-8 text-red-500 rotate-90" />
@@ -3182,7 +3221,7 @@ function App() {
                     value={withdrawalAmount} 
                     onChange={(e) => setWithdrawalAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.8rem] p-8 text-center text-4xl font-black text-white outline-none focus:border-red-500/20 transition-all"
+                    className="w-full bg-white/[0.05] border border-white/[0.05] rounded-[1.8rem] p-8 text-center text-4xl font-black text-white outline-none focus:border-red-500/20 transition-all"
                     autoFocus
                   />
                 </div>
@@ -3192,14 +3231,14 @@ function App() {
                   value={withdrawalNote} 
                   onChange={(e) => setWithdrawalNote(e.target.value)}
                   placeholder="Notes (Optional)"
-                  className="w-full bg-white/[0.01] border border-white/[0.05] rounded-[1.2rem] p-4 text-center text-sm font-medium text-white/60 outline-none focus:border-white/10 transition-all"
+                  className="w-full bg-white/[0.05] border border-white/[0.05] rounded-[1.2rem] p-4 text-center text-sm font-medium text-white/60 outline-none focus:border-white/10 transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3 mt-8">
                 <button 
                   onClick={() => setIsAddingWithdrawal(false)}
-                  className="py-5 bg-white/[0.02] text-white/40 border border-white/[0.05] rounded-[1.2rem] font-black uppercase tracking-[0.2em] text-[10px] active:scale-95 transition-all"
+                  className="py-5 bg-white/[0.05] text-white/40 border border-white/[0.05] rounded-[1.2rem] font-black uppercase tracking-[0.2em] text-[10px] active:scale-95 transition-all"
                 >
                   Cancel
                 </button>
@@ -3217,8 +3256,8 @@ function App() {
       {/* Glassmorphism Delete Confirmation Modal */}
       {recordToDelete && (
         <>
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[200] animate-fade-in" onClick={() => setRecordToDelete(null)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[210] w-[85%] max-w-xs bg-white/[0.03] backdrop-blur-[50px] border border-white/10 rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[200] animate-fade-in" onClick={() => setRecordToDelete(null)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[210] w-[85%] max-w-xs bg-white/[0.05] backdrop-blur-[30px] border border-white/5 rounded-[2.5rem] p-8 animate-in zoom-in duration-300 shadow-2xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] to-transparent rounded-[2.5rem] pointer-events-none" />
             
             <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 relative overflow-hidden group">

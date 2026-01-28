@@ -51,7 +51,7 @@ const EconomicTickerTape: React.FC = () => {
     <div className="w-full px-0 sm:px-4 mb-4 animate-fade-in">
       <div className="max-w-[1400px] mx-auto">
         <div className="relative group">
-          <div className="relative backdrop-blur-xl h-[40px] flex items-center shadow-lg overflow-hidden border bg-white/[0.02] border-white/[0.05] rounded-xl">
+          <div className="relative h-[40px] flex items-center ios-card-mini overflow-visible rounded-xl">
             <div className="absolute inset-y-0 left-0 w-1 bg-red-500/40 z-[30]" />
             <div className="absolute inset-y-0 right-0 w-1 bg-red-500/40 z-[30]" />
             <div className="w-full h-full flex items-center justify-center">

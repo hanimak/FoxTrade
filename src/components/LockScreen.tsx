@@ -97,12 +97,12 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
   }, [handleNumberClick, handleDelete]);
 
   return (
-    <div className="absolute inset-0 z-[100] backdrop-blur-3xl flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/40">
+    <div className="absolute inset-0 z-[100] backdrop-blur-[15px] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-white/[0.05]">
       {/* High Quality Background Design - Uses App Background via Backdrop Blur */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] via-transparent to-black/20" />
         {/* Grain/Noise Texture for Consistency */}
-        <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center">
@@ -142,28 +142,41 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
         </div>
 
         {/* Keypad */}
-        <div className="grid grid-cols-3 gap-8 sm:gap-12">
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+        <div className="grid grid-cols-3 gap-x-8 gap-y-6 sm:gap-x-12 sm:gap-y-8">
+          {[
+            { num: '1', letters: '' },
+            { num: '2', letters: 'ABC' },
+            { num: '3', letters: 'DEF' },
+            { num: '4', letters: 'GHI' },
+            { num: '5', letters: 'JKL' },
+            { num: '6', letters: 'MNO' },
+            { num: '7', letters: 'PQRS' },
+            { num: '8', letters: 'TUV' },
+            { num: '9', letters: 'WXYZ' }
+          ].map((item) => (
             <button
-              key={num}
-              onClick={() => { handleNumberClick(num); haptic('light'); }}
-              className="w-20 h-20 rounded-full flex flex-col items-center justify-center transition-all active:scale-90 border bg-white/[0.03] border-white/[0.05] hover:bg-white/[0.06] text-white"
+              key={item.num}
+              onClick={() => { handleNumberClick(item.num); haptic('light'); }}
+              className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/10 backdrop-blur-[10px] border border-white/20 flex flex-col items-center justify-center transition-all duration-200 active:bg-white/30 active:scale-95 group"
             >
-              <span className="text-3xl font-bold">{num}</span>
+              <span className="text-3xl sm:text-4xl font-normal text-white mb-0.5 leading-none">{item.num}</span>
+              {item.letters && (
+                <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.1em] text-white/50 leading-none group-active:text-white/70">{item.letters}</span>
+              )}
             </button>
           ))}
-          <div className="w-20 h-20" />
+          <div className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px]" />
           <button
             onClick={() => { handleNumberClick('0'); haptic('light'); }}
-            className="w-20 h-20 rounded-full flex flex-col items-center justify-center transition-all active:scale-90 border bg-white/[0.03] border-white/[0.05] hover:bg-white/[0.06] text-white"
+            className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full bg-white/10 backdrop-blur-[10px] border border-white/20 flex flex-col items-center justify-center transition-all duration-200 active:bg-white/30 active:scale-95 group"
           >
-            <span className="text-3xl font-bold">0</span>
+            <span className="text-3xl sm:text-4xl font-normal text-white mb-0.5 leading-none">0</span>
           </button>
           <button
             onClick={() => { handleDelete(); haptic('medium'); }}
-            className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 text-white/40 hover:text-white"
+            className="w-[75px] h-[75px] sm:w-[85px] sm:h-[85px] rounded-full flex items-center justify-center transition-all active:scale-90 text-white/40 hover:text-white"
           >
-            <Delete className="w-8 h-8" />
+            <span className="text-xs font-bold uppercase tracking-widest">Cancel</span>
           </button>
         </div>
 

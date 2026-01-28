@@ -206,7 +206,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
   if (activeData.length <= 1) {
     return (
       <div className={cn(
-        "h-full w-full flex flex-col items-center justify-center text-muted-foreground backdrop-blur-xl border rounded-[2.5rem]",
+        "h-full w-full flex flex-col items-center justify-center text-muted-foreground backdrop-blur-xl border ios-card overflow-visible",
         "bg-transparent border-white/[0.05]",
         className
       )}>
@@ -229,8 +229,8 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
       <div className="flex items-center justify-between mb-2 sm:mb-4 relative z-10 px-2">
         <div className="flex items-center gap-2 sm:gap-4">
           <div className={cn(
-            "w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center border",
-            "bg-white/[0.03] border-white/[0.05]"
+            "w-8 h-8 sm:w-10 sm:h-10 ios-card-mini overflow-visible p-0 flex items-center justify-center border",
+            "bg-white/[0.06] border-white/[0.05]"
           )}>
             <Activity className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", "text-primary/60")} />
           </div>
@@ -255,7 +255,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
 
         {/* View Mode Toggle */}
         <div className={cn(
-          "flex items-center p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border shadow-inner transition-all duration-300",
+          "flex items-center p-0.5 sm:p-1 ios-card-mini overflow-visible p-1 border shadow-inner transition-all duration-300",
           "bg-black/40 border-white/5"
         )}>
           <button 
@@ -266,7 +266,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               setViewMode('line');
             }}
             className={cn(
-              "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1 sm:gap-2",
+              "px-2 sm:px-4 py-1 sm:py-2 ios-card-mini overflow-visible transition-all duration-300 flex items-center gap-1 sm:gap-2",
               viewMode === 'line' 
                 ? "bg-white/[0.05] text-white border border-white/10 shadow-lg"
                 : "text-white/20 hover:text-white/40"
@@ -283,7 +283,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               setViewMode('candle');
             }}
             className={cn(
-              "px-2 sm:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1 sm:gap-2",
+              "px-2 sm:px-4 py-1 sm:py-2 ios-card-mini overflow-visible transition-all duration-300 flex items-center gap-1 sm:gap-2",
               viewMode === 'candle' 
                 ? "bg-white/[0.05] text-white border border-white/10 shadow-lg"
                 : "text-white/20 hover:text-white/40"
