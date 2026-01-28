@@ -35,138 +35,127 @@ export const ShareCard: React.FC<ShareCardProps> = ({ cardRef, data }) => {
           WebkitFontSmoothing: 'antialiased'
         }}
       >
-        {/* Background Elements */}
-        
+        {/* Background Overlay to match app's 92% dark overlay */}
+        <div className="absolute inset-0 bg-black/92 z-0" />
+
         {/* Top Section: Logo & Brand */}
-        <div className="z-10 flex flex-col items-center space-y-6 mt-16">
+        <div className="z-10 flex flex-col items-center space-y-6 mt-24">
           <div className="relative">
             <div className={cn(
-              "w-40 h-40 rounded-[2.5rem] border flex items-center justify-center p-5 relative z-10 shadow-2xl",
-              "bg-white/5 border-white/10"
+              "w-48 h-48 rounded-[3rem] border flex items-center justify-center p-6 relative z-10 shadow-2xl",
+              "bg-white/[0.05] border-white/[0.05]"
             )}>
               <img src={logo} alt="Fox Trade" className="w-full h-full object-contain" />
             </div>
           </div>
-          <div className="flex flex-col items-center space-y-3">
+          <div className="flex flex-col items-center space-y-4">
             <h1 className={cn(
-              "text-4xl font-black tracking-[0.6em] uppercase translate-x-[0.3em]",
+              "text-6xl font-black tracking-[0.6em] uppercase translate-x-[0.3em]",
               "text-white"
             )}>Fox Trade</h1>
-            <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <div className="h-[2px] w-48 bg-white/10" />
           </div>
         </div>
 
         {/* Main Content: Profit/Loss */}
-        <div className="z-10 flex flex-col items-center space-y-6 w-full">
+        <div className="z-10 flex flex-col items-center space-y-10 w-full">
           <div className={cn(
-            "px-6 py-2 border rounded-full",
-            "bg-white/[0.06] border-white/[0.05]"
+            "px-10 py-4 border rounded-full",
+            "bg-white/[0.05] border-white/[0.05]"
           )}>
             <span className={cn(
-              "text-lg font-black uppercase tracking-[0.4em]",
-              "text-white/40"
+              "text-2xl font-black uppercase tracking-[0.5em]",
+              "text-white/30"
             )}>{data.period} Performance</span>
           </div>
 
-          <div className="relative group">
-            <div className="relative flex flex-col items-center space-y-2">
+          <div className="relative flex flex-col items-center space-y-4">
+            <span className={cn(
+              "text-[180px] font-black tracking-tighter leading-none",
+              isPositive ? "text-green-500" : "text-red-500"
+            )}>
+              {isPositive ? '+' : ''}{data.totalProfit.toLocaleString()}
               <span className={cn(
-                "text-[120px] font-black tracking-tighter leading-none",
-                isPositive ? "text-green-500" : "text-red-500"
-              )}>
-                {isPositive ? '+' : ''}{data.totalProfit.toLocaleString()}
-                <span className={cn(
-                  "text-3xl font-light ml-3 opacity-50",
-                  "text-white"
-                )}>$</span>
-              </span>
-            </div>
+                "text-5xl font-light ml-4 opacity-50 text-white"
+              )}>$</span>
+            </span>
           </div>
 
           <div className={cn(
-            "flex items-center gap-5 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-500",
+            "flex items-center gap-6 px-12 py-6 rounded-[3rem] border transition-all duration-500",
             isPositive 
-              ? "bg-green-500/10 border-green-500/20 text-green-500"
-              : "bg-red-500/10 border-red-500/20 text-red-500"
+              ? "bg-green-500/10 border-green-500/10 text-green-500"
+              : "bg-red-500/10 border-red-500/10 text-red-500"
           )}>
-            {isPositive ? <TrendingUp className="w-10 h-10" /> : <TrendingDown className="w-10 h-10" />}
-            <span className="text-4xl font-black tracking-tight">
+            {isPositive ? <TrendingUp className="w-12 h-12" /> : <TrendingDown className="w-12 h-12" />}
+            <span className="text-5xl font-black tracking-tight">
               {isPositive ? '+' : ''}{data.growthPercentage.toFixed(1)}% Growth
             </span>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="z-10 grid grid-cols-2 gap-6 w-full px-8">
+        <div className="z-10 grid grid-cols-2 gap-10 w-full px-16">
           <div className={cn(
-            "ios-card overflow-visible border rounded-[2.5rem] p-8 flex flex-col items-center space-y-3",
+            "border rounded-[3rem] p-12 flex flex-col items-center space-y-5",
             "bg-white/[0.05] border-white/[0.05]"
           )}>
-            <div className="p-4 bg-primary/10 rounded-2xl">
-              <Trophy className="w-10 h-10 text-primary" />
+            <div className="p-5 bg-white/[0.05] rounded-3xl border border-white/[0.05]">
+              <Trophy className="w-12 h-12 text-primary" />
             </div>
             <div className="text-center w-full overflow-hidden">
               <p className={cn(
-                "text-lg font-black uppercase tracking-widest mb-1",
-                "text-white/20"
+                "text-xl font-black uppercase tracking-[0.3em] mb-2 text-white/20"
               )}>Win Rate</p>
               <p className={cn(
-                "text-4xl font-black truncate px-2",
-                "text-white"
+                "text-6xl font-black truncate px-2 text-white"
               )}>{Math.round(data.winRate)}%</p>
             </div>
           </div>
 
           <div className={cn(
-            "border rounded-[2.5rem] p-8 flex flex-col items-center space-y-3",
+            "border rounded-[3rem] p-12 flex flex-col items-center space-y-5",
             "bg-white/[0.05] border-white/[0.05]"
           )}>
-            <div className="p-4 bg-amber-500/10 rounded-2xl">
-              <Sparkles className="w-10 h-10 text-amber-500" />
+            <div className="p-5 bg-white/[0.05] rounded-3xl border border-white/[0.05]">
+              <Sparkles className="w-12 h-12 text-amber-500" />
             </div>
             <div className="text-center w-full overflow-hidden">
               <p className={cn(
-                "text-lg font-black uppercase tracking-widest mb-1",
-                "text-white/20"
+                "text-xl font-black uppercase tracking-[0.3em] mb-2 text-white/20"
               )}>Health Score</p>
               <p className={cn(
-                "text-4xl font-black truncate px-2",
-                "text-white"
+                "text-6xl font-black truncate px-2 text-white"
               )}>{Math.round(data.healthScore)}%</p>
             </div>
           </div>
         </div>
 
         {/* Bottom Section: Footer */}
-        <div className="z-10 w-full flex flex-col items-center space-y-6 mb-8">
+        <div className="z-10 w-full flex flex-col items-center space-y-10 mb-16">
           <div className={cn(
-            "flex items-center gap-5 px-6 py-3 border rounded-full",
+            "flex items-center gap-6 px-10 py-5 border rounded-full",
             "bg-white/[0.05] border-white/[0.05]"
           )}>
-            <Wallet className={cn("w-5 h-5", "text-white/20")} />
+            <Wallet className="w-8 h-8 text-white/20" />
             <span className={cn(
-              "text-lg font-black uppercase tracking-[0.3em]",
-              "text-white/40"
+              "text-2xl font-black uppercase tracking-[0.4em] text-white/30"
             )}>
               Portfolio Value: <span className="text-white">${data.currentCapital.toLocaleString()}</span>
             </span>
           </div>
 
-          <div className="flex flex-col items-center space-y-2">
+          <div className="flex flex-col items-center space-y-4">
             <p className={cn(
-              "text-base font-black uppercase tracking-[0.6em]",
-              "text-white/10"
+              "text-xl font-black uppercase tracking-[0.8em] text-white/10"
             )}>Professional Trading Companion</p>
-            <div className="flex items-center gap-3">
-              <div className="h-[2px] w-12 bg-gradient-to-r from-transparent to-primary/30" />
-              <div className="h-[2px] w-12 bg-gradient-to-l from-transparent to-primary/30" />
-            </div>
+            <div className="h-[2px] w-64 bg-white/[0.05]" />
           </div>
         </div>
 
-        {/* Decorative Corner Elements */}
-        <div className="absolute top-0 right-0 w-80 h-80 border-t-4 border-r-4 border-primary/20 rounded-tr-[10rem] -translate-x-10 translate-y-10" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 border-b-4 border-l-4 border-primary/20 rounded-bl-[10rem] translate-x-10 -translate-y-10" />
+        {/* Decorative Corner Elements - Minimalist */}
+        <div className="absolute top-0 right-0 w-96 h-96 border-t-[2px] border-r-[2px] border-white/[0.03] rounded-tr-[12rem] -translate-x-12 translate-y-12" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 border-b-[2px] border-l-[2px] border-white/[0.03] rounded-bl-[12rem] translate-x-12 -translate-y-12" />
       </div>
     </div>
   );

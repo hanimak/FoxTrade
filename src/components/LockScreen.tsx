@@ -97,10 +97,10 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
   }, [handleNumberClick, handleDelete]);
 
   return (
-    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/60">
+    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/40 backdrop-blur-3xl">
       {/* High Quality Background Design - Glass Effect */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/60" />
         <div className="absolute inset-0 border-t border-white/[0.05]" />
         {/* Grain/Noise Texture for Consistency */}
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
