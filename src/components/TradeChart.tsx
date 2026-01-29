@@ -270,14 +270,14 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               haptic('light');
             }}
             className={cn(
-              "px-5 sm:px-10 py-2.5 rounded-xl transition-all duration-500 flex items-center gap-3 group/btn relative",
+              "px-3 sm:px-10 py-1.5 sm:py-2.5 rounded-xl transition-all duration-500 flex items-center gap-1.5 sm:gap-3 group/btn relative",
               viewMode === 'line' 
                 ? "bg-primary text-primary-foreground font-black shadow-[0_4px_20px_-5px_rgba(234,179,8,0.5)]"
                 : "text-white/30 hover:text-white/60 hover:bg-white/[0.02]"
             )}
           >
-            <LineChart className={cn("w-4 h-4 transition-transform duration-500 group-hover/btn:scale-110", viewMode === 'line' ? "text-primary-foreground" : "text-white/30")} />
-            <span className="text-[10px] sm:text-[12px] uppercase tracking-[0.1em] font-black">Line</span>
+            <LineChart className={cn("w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-500 group-hover/btn:scale-110", viewMode === 'line' ? "text-primary-foreground" : "text-white/30")} />
+            <span className="text-[8px] sm:text-[12px] uppercase tracking-[0.1em] font-black">Line</span>
           </button>
           <button 
             type="button"
@@ -287,14 +287,14 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
               haptic('light');
             }}
             className={cn(
-              "px-5 sm:px-10 py-2.5 rounded-xl transition-all duration-500 flex items-center gap-3 group/btn relative",
+              "px-3 sm:px-10 py-1.5 sm:py-2.5 rounded-xl transition-all duration-500 flex items-center gap-1.5 sm:gap-3 group/btn relative",
               viewMode === 'candle' 
                 ? "bg-primary text-primary-foreground font-black shadow-[0_4px_20px_-5px_rgba(234,179,8,0.5)]"
                 : "text-white/30 hover:text-white/60 hover:bg-white/[0.02]"
             )}
           >
-            <CandlestickChart className={cn("w-4 h-4 transition-transform duration-500 group-hover/btn:scale-110", viewMode === 'candle' ? "text-primary-foreground" : "text-white/30")} />
-            <span className="text-[10px] sm:text-[12px] uppercase tracking-[0.1em] font-black">Candle</span>
+            <CandlestickChart className={cn("w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-500 group-hover/btn:scale-110", viewMode === 'candle' ? "text-primary-foreground" : "text-white/30")} />
+            <span className="text-[8px] sm:text-[12px] uppercase tracking-[0.1em] font-black">Candle</span>
           </button>
         </div>
       </div>
