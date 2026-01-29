@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
 import logo from './assets/app-logo-new.png';
-import background from './assets/background.png';
+const background = './background.png';
 import { LockScreen } from './components/LockScreen';
 import LivePriceTicker from './components/LivePriceTicker';
 import { 
