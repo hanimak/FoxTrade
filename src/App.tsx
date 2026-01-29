@@ -1,16 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 // Force Update v36.0
-import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Share2, Sparkles, Bell, BellOff, Sun, Moon, FileText, Calendar, UserCircle } from 'lucide-react';
+import { Wallet, RotateCcw, Download, Upload, Lock, LayoutGrid, BarChart3, Settings, X, Clock, FileSpreadsheet, TrendingUp, TrendingDown, LogOut, AlertTriangle, Target, Trophy, Info, Trash2, Cloud, RefreshCcw, Sparkles, Bell, BellOff, Sun, Moon, FileText, Calendar, UserCircle } from 'lucide-react';
 import { cn, haptic } from './lib/utils';
 import { type DailyRecord, type MT5Trade } from './types';
 import * as XLSX from 'xlsx';
-import { toPng } from 'html-to-image';
 import { calculateStatistics, getPeriodStats, getSmartInsights, calculateSessionStats } from './lib/statistics';
 import { StatsOverview } from './components/StatsOverview';
 import logo from './assets/app-logo-new.png';
 const background = '/background.png';
 import { LockScreen } from './components/LockScreen';
-import { ShareCard } from './components/ShareCard';
 import LivePriceTicker from './components/LivePriceTicker';
 import { 
   auth, 
@@ -82,8 +80,6 @@ function App() {
   const [profileImgError, setProfileImgError] = useState(false);
   const isSyncingFromCloudRef = useRef(false);
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
-  const shareCardRef = useRef<HTMLDivElement>(null);
-  const [isSharing, setIsSharing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const getFormattedDate = (dateStr: string) => {
@@ -1286,36 +1282,6 @@ function App() {
     setMt5Preview(null);
   };
 
-  const handleShare = async () => {
-    if (!shareCardRef.current) return;
-    
-    try {
-      haptic('heavy');
-      setIsSharing(true);
-      
-      // Give more time for assets to load and styles to settle
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const dataUrl = await toPng(shareCardRef.current, {
-        quality: 1.0,
-        pixelRatio: 3, // Higher resolution for better quality
-        cacheBust: true, // Force reload images
-        skipFonts: false,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `fox-trade-performance-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = dataUrl;
-      link.click();
-      
-      setIsSharing(false);
-    } catch (err) {
-      console.error('Error sharing performance:', err);
-      setIsSharing(false);
-      alert('Failed to generate share image. Please try again.');
-    }
-  };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
@@ -1396,29 +1362,6 @@ function App() {
                       ? 'linear-gradient(to bottom, transparent, rgba(5, 5, 7, 0.4))'
                       : 'linear-gradient(to bottom, transparent, rgba(248, 249, 250, 0.4))',
                   }} />
-
-                  {/* Share Button */}
-                  <div className={cn(
-                    "absolute top-3 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:top-4 sm:right-4 z-50 transition-all duration-500",
-                    isScrolled ? "opacity-0 scale-50 pointer-events-none" : "opacity-100 scale-100"
-                  )}>
-                    <button 
-                      onClick={handleShare}
-                      disabled={isSharing}
-                      className={cn(
-                        "flex items-center justify-center gap-2 px-6 py-1.5 sm:p-3 rounded-full sm:rounded-2xl bg-white/[0.05] border border-white/[0.05] transition-all duration-300 active:scale-95",
-                        theme === 'light' && "bg-black/[0.05] border-black/[0.05]",
-                        isSharing && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      {isSharing ? (
-                        <RefreshCcw className="w-3.5 h-3.5 text-primary animate-spin" />
-                      ) : (
-                        <Share2 className={cn("w-3.5 h-3.5 transition-colors", theme === 'light' ? "text-slate-900/20" : "text-white/20")} />
-                      )}
-                      <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] sm:hidden", theme === 'light' ? "text-slate-900/20" : "text-white/20")}>Share</span>
-                    </button>
-                  </div>
 
                   <div className={cn(
                     "relative z-10 flex flex-col items-center text-center space-y-2 sm:space-y-4 transition-all duration-500",
@@ -3004,20 +2947,6 @@ function App() {
 
       {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} theme={theme} />}
       
-      {/* Hidden Share Card for Capture */}
-      <ShareCard 
-        cardRef={shareCardRef}
-        data={{
-          totalProfit: stats.totalProfit,
-          growthPercentage: parseFloat(((stats.totalProfit / initialCapital) * 100).toFixed(1)),
-          winRate: stats.winRate,
-          currentCapital: currentCapital,
-          period: 'Overall',
-          healthScore: geniusMetrics.healthScore
-        }}
-        theme={theme}
-      />
-
       {/* Main Content Area */}
        <main className="flex-1 overflow-y-auto relative z-10 pt-[calc(env(safe-area-inset-top)+2rem)] px-3 sm:px-6 custom-scroll pb-32">
         <div className="relative z-10 max-w-[1400px] mx-auto">
