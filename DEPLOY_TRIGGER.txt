@@ -1,1 +1,1 @@
-Final Success Deployment v31.2: Thu Jan 29 03:00:00 EET 2026 (Restored Glassy Popups)
+Final Success Deployment v31.3: Sat Jan 31 19:00:00 EET 2026 (Final Sync and Blur Fixes)

@@ -97,7 +97,7 @@ export function LockScreen({ onUnlock, theme = 'dark' }: LockScreenProps) {
   }, [handleNumberClick, handleDelete]);
 
   return (
-    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/40 backdrop-blur-3xl">
+    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center animate-in fade-in duration-700 overflow-hidden bg-black/40 backdrop-blur-[60px]">
       {/* High Quality Background Design - Glass Effect */}
       <div className="absolute inset-0 pointer-events-none select-none z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/60" />

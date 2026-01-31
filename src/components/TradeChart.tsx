@@ -260,7 +260,7 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
         {/* View Mode Toggle - Premium iOS Segmented Control */}
         <div className={cn(
           "flex items-center p-1 rounded-2xl border transition-all duration-500",
-          "bg-white/[0.03] border-white/[0.05] shadow-inner backdrop-blur-sm"
+          "bg-white/[0.03] border-white/[0.05] shadow-inner backdrop-blur-[30px]"
         )}>
           <button 
             type="button"
