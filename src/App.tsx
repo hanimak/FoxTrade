@@ -2922,10 +2922,13 @@ function App() {
       {isLocked && <LockScreen onUnlock={() => setIsLocked(false)} theme={theme} />}
       
       {/* Permanent Top Gradient Blur Fade - Elevated z-index to cover cards but stay behind ticker */}
-      <div className="gradient-blur-header" style={{ zIndex: 90 }} />
+      <div className={cn("gradient-blur-header transition-opacity duration-500", isLocked ? "opacity-0" : "opacity-100")} style={{ zIndex: 90 }} />
       
       {/* Main Content Area */}
-       <main className="flex-1 overflow-y-auto pt-[calc(env(safe-area-inset-top)+2rem)] px-3 sm:px-6 custom-scroll pb-32">
+       <main className={cn(
+         "flex-1 overflow-y-auto pt-[calc(env(safe-area-inset-top)+2rem)] px-3 sm:px-6 custom-scroll pb-32 transition-opacity duration-500",
+         isLocked ? "opacity-0 pointer-events-none" : "opacity-100"
+       )}>
         <div className="max-w-[1400px] mx-auto">
           {renderTabContent()}
         </div>
@@ -2933,7 +2936,8 @@ function App() {
 
       {/* Bottom Gradient Fade */}
       <div className={cn(
-        "fixed bottom-0 left-0 right-0 h-32 z-40 pointer-events-none bg-gradient-to-t",
+        "fixed bottom-0 left-0 right-0 h-32 z-40 pointer-events-none bg-gradient-to-t transition-opacity duration-500",
+        isLocked ? "opacity-0" : "opacity-100",
         theme === 'light' 
           ? "from-[#f8f9fa] via-[#f8f9fa]/90 to-transparent" 
           : "from-[#050507] via-[#050507]/90 to-transparent"
@@ -2942,6 +2946,7 @@ function App() {
       {/* iOS 26 Tab Bar - Glassy Water Effect */}
       <nav className={cn(
         "fixed bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] left-4 right-4 z-50 border px-2 py-2 flex items-center justify-between rounded-[2.5rem] overflow-visible transition-all duration-500",
+        isLocked ? "opacity-0 pointer-events-none translate-y-10" : "opacity-100 translate-y-0",
         theme === 'light' 
           ? "bg-gradient-to-b from-white/40 via-white/20 to-white/10 border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]" 
           : "bg-gradient-to-b from-white/15 via-white/5 to-white/5 border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]"
