@@ -30,9 +30,11 @@ export function TradeChart({ data, initialCapital, className }: TradeChartProps)
   const chartData = useMemo(() => {
     if (data.length === 0) return { realData: [], futureData: [] };
 
-    const sortedRecords = [...data].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    const sortedRecords = [...data]
+      .filter(r => r.type !== 'withdrawal')
+      .sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
 
     const groupedByDate = sortedRecords.reduce((acc: Record<string, { date: string, profit: number, records: DailyRecord[] }>, curr) => {
       const dateKey = new Date(curr.date).toISOString().split('T')[0];
